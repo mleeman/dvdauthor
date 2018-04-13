@@ -16,6 +16,9 @@ Build-Depends: debhelper (>= 10),
                 libxml2-dev,
                 quilt
 Standards-Version: 3.9.8
+Homepage: http://dvdauthor.sourceforge.net/
+Vcs-git: https://github.com/mleeman/dvdauthor.git
+Vcs-Browser: https://github.com/mleeman/dvdauthor
 
 Package: dvdauthor
 Architecture: any
