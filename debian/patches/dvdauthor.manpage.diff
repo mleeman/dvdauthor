@@ -1,0 +1,18 @@
+--- dvdauthor-0.6.14/doc/dvdauthor.1	2010-11-21 18:49:00.000000000 +0100
++++ dvdauthor-0.6.14/doc/dvdauthor.1	2010-11-21 18:45:39.000000000 +0100
+@@ -290,7 +290,7 @@ However, language and content must be ma
+ possible to just list the language and content attributes and let
+ \fBdvdauthor\fR fill in the rest.
+ .TP
+-\fB<subpicture [lang="\fIlanguage\fB"] [content="normal|large|children|normal_cc|large_cc|children_cc|forced|director|large_director|children_director"] />\fR
++\fB<subpicture [lang="\fIlanguage\fB"] [content="normal | large | children | normal_cc | large_cc | children_cc | forced | director | large_director | children_director"] />\fR
+ Manually configures a subpicture/subtitle for this pgcgroup or PGC.
+ At the pgcgroup level, list once for each language. Occurrences at the PGC level
+ don't have lang or content attributes; they inherit those
+@@ -570,4 +570,4 @@ the total amount of video in the VMG men
+ sectors of 2kiB each). In each titleset, all the menu video must fit in the first VOB
+ (VTS_nn_0.VOB), so is limited to the same amount.
+ <marc.leeman@gmail.com>
+-MarcLeeman2003Marc LeemanFri Dec 30 19:47:26 CET 2005
+\ No newline at end of file
++MarcLeeman2003Marc LeemanFri Dec 30 19:47:26 CET 2005

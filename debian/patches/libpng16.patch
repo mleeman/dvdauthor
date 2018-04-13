@@ -1,0 +1,27 @@
+Description: Fix for libpng1.6 transition
+ The new API hides internal structs, getters/setters are to be used.
+ Here: png_setjmp()
+Author: Tobias Frost <tobi@debian.org>
+Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=649971
+Last-Update: 2016-01-07
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+--- a/src/spuunmux.c
++++ b/src/spuunmux.c
+@@ -38,6 +38,7 @@
+ 
+ #include <netinet/in.h>
+ 
++#include <zlib.h>
+ #include <png.h>
+ 
+ #include "rgb.h"
+@@ -610,7 +611,7 @@
+         png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
+         return -1;
+       } /*if*/
+-    if (setjmp(png_ptr->jmpbuf))
++    if (setjmp(png_jmpbuf(png_ptr)))
+       {
+         png_destroy_write_struct(&png_ptr, &info_ptr);
+         fclose(fp);

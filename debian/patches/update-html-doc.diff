@@ -1,0 +1,7909 @@
+hide HTML update in patch to avoid lintian complaining
+Index: dvdauthor-0.6.14/html/dvdauthor.html
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ dvdauthor-0.6.14/html/dvdauthor.html	2010-01-04 14:32:00.000000000 +0100
+@@ -0,0 +1,1688 @@
++<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
++<HTML
++><HEAD
++><TITLE
++>dvdauthor</TITLE
++><META
++NAME="GENERATOR"
++CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
++REL="HOME"
++TITLE="DVDAuthor"
++HREF="index.html"><LINK
++REL="UP"
++TITLE="DVDAuthor Man Pages"
++HREF="manpages.html"><LINK
++REL="PREVIOUS"
++TITLE="DVDAuthor Man Pages"
++HREF="manpages.html"><LINK
++REL="NEXT"
++TITLE="dvddirdel"
++HREF="r2253.html"></HEAD
++><BODY
++CLASS="REFENTRY"
++BGCOLOR="#FFFFFF"
++TEXT="#000000"
++LINK="#0000FF"
++VLINK="#840084"
++ALINK="#0000FF"
++><DIV
++CLASS="NAVHEADER"
++><TABLE
++SUMMARY="Header navigation table"
++WIDTH="100%"
++BORDER="0"
++CELLPADDING="0"
++CELLSPACING="0"
++><TR
++><TH
++COLSPAN="3"
++ALIGN="center"
++>DVDAuthor</TH
++></TR
++><TR
++><TD
++WIDTH="10%"
++ALIGN="left"
++VALIGN="bottom"
++><A
++HREF="manpages.html"
++ACCESSKEY="P"
++>Prev</A
++></TD
++><TD
++WIDTH="80%"
++ALIGN="center"
++VALIGN="bottom"
++></TD
++><TD
++WIDTH="10%"
++ALIGN="right"
++VALIGN="bottom"
++><A
++HREF="r2253.html"
++ACCESSKEY="N"
++>Next</A
++></TD
++></TR
++></TABLE
++><HR
++ALIGN="LEFT"
++WIDTH="100%"></DIV
++><H1
++><A
++NAME="DVDAUTHOR"
++></A
++>dvdauthor</H1
++><DIV
++CLASS="REFNAMEDIV"
++><A
++NAME="AEN1745"
++></A
++><H2
++>Name</H2
++>dvdauthor&nbsp;--&nbsp;assembles multiple mpeg program streams into a suitable DVD filesystem</DIV
++><DIV
++CLASS="REFSYNOPSISDIV"
++><A
++NAME="AEN1748"
++></A
++><H2
++>Synopsis</H2
++><P
++><B
++CLASS="COMMAND"
++>dvdauthor</B
++>  [-o <TT
++CLASS="REPLACEABLE"
++><I
++>output-dir</I
++></TT
++>] {-x <TT
++CLASS="REPLACEABLE"
++><I
++>xml-config-file</I
++></TT
++>}</P
++><P
++><B
++CLASS="COMMAND"
++>dvdauthor</B
++>  [-o <TT
++CLASS="REPLACEABLE"
++><I
++>output-dir</I
++></TT
++>] [-j | --jumppad | -g | --allgprm] [-T | --toc] [<TT
++CLASS="REPLACEABLE"
++><I
++>menu or title options</I
++></TT
++>]</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN1769"
++></A
++><H2
++>DVD Background</H2
++><P
++>&#13;At a high level, a DVD is a collection of menus and titles.
++Conceptually, a menu contains buttons which can be assigned actions
++and provides a list of choices to the end user, while a title contains
++the main content of the DVD.  However, in reality many of the features
++available in menus (including buttons, pausing, and looping) are also
++available in titles.&#13;</P
++><P
++>&#13;The menus and titles are divided into titlesets and the VMGM menu set.
++A titleset can contain a number of menus and titles which are meant to
++act together.  The "menu", "audio", "subtitle", and "angle" buttons on
++the DVD player's remote control will all access menus in the same
++titleset as the title which is being played.  All the titles and menus
++of a given titleset have the same video, audio, and subtitle settings
++(the definitions for the menus are independent from the definitions
++for the titles), so if you want to have different settings (for
++example widescreen vs standard aspect ratios), then you need separate
++titlesets.  Titlesets are not meant to jump to one another, so the
++VMGM menu domain is used.  It is a collection of menus (no titles)
++that can access the menus and titles of all the titlesets.&#13;</P
++><P
++>&#13;One of the most frusterating things when deciding how to author a DVD
++is that there are often many ways to accomplish the same task.  For
++example, you must decide whether to locate menus at the VMGM level or
++the titleset level.  A typical setup is to locate the high level menus
++at the VMGM level, and the low level configuration menus (scene /
++audio / subtitle selection) at the titleset.  If there are DVD extras,
++perhaps with a lower quality audio track and a 4:3 aspect ratio, then
++they would be in a separate titleset with a menu to select among the
++extras located at the titleset level.&#13;</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN1774"
++></A
++><H2
++>dvdauthor Description</H2
++><P
++><B
++CLASS="COMMAND"
++>dvdauthor</B
++> works in discrete operations.  It
++authors each titleset one at a time, and then finally authors the VMGM
++to complete the disc.  At that point the contents can be written out
++to a DVD.  If you are controlling <B
++CLASS="COMMAND"
++>dvdauthor</B
++> with
++command line arguments, then each step will occur independently;
++however if you are using the XML configuration file, then you have the
++option of combining some or all the steps into one.</P
++><P
++>The VOBs passed to <B
++CLASS="COMMAND"
++>dvdauthor</B
++> must have DVD
++NAV (VOBU) packets multiplexed in at the correct locations.  Many
++tools can do this, including <B
++CLASS="COMMAND"
++>mplex</B
++> from mjpegtools
++1.6.0 or later.  <B
++CLASS="COMMAND"
++>dvdauthor</B
++> will then fill these
++packets in with the correct data.  Special care has been taken to
++ensure <B
++CLASS="COMMAND"
++>dvdauthor</B
++> is fifo compliant; that is every
++source VOB can be the output of another program (such as
++<B
++CLASS="COMMAND"
++>mplex</B
++>).  This can make execution faster on many
++systems by avoiding extra filesystem accesses.</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN1785"
++></A
++><H2
++>Command Line Description</H2
++><P
++></P
++><DIV
++CLASS="VARIABLELIST"
++><DL
++><DT
++><TT
++CLASS="LITERAL"
++>-o <TT
++CLASS="REPLACEABLE"
++><I
++>output-dir</I
++></TT
++></TT
++></DT
++><DD
++><P
++>The destination directory to store the DVD-Video file structure in.</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>-j</TT
++>, <TT
++CLASS="LITERAL"
++>--jumppad</TT
++></DT
++><DD
++><P
++>foo</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>-g</TT
++>, <TT
++CLASS="LITERAL"
++>--allgprm</TT
++></DT
++><DD
++><P
++>Enable the use of all 16 general purpose registers.  Prohibits the use of jumppad and some complex expressions that require temporary registers.</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>-T</TT
++></DT
++><DD
++><P
++>Creates the table of contents file instead of a
++titleset. If this option is used, it should be listed first, and you
++may not specify any titles.</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>-m</TT
++></DT
++><DD
++><P
++>Creates a menu.</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>-t</TT
++></DT
++><DD
++><P
++>Creates a title.</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>-v <TT
++CLASS="REPLACEABLE"
++><I
++>video-opts</I
++></TT
++></TT
++>, <TT
++CLASS="LITERAL"
++>--video=<TT
++CLASS="REPLACEABLE"
++><I
++>video-opts</I
++></TT
++></TT
++></DT
++><DD
++><P
++>A plus (+) separated list of video options.  Dvdauthor
++will try to infer any unspecified options.  pal, ntsc, 4:3, 16:9,
++720xfull, 720x576, 720x480, 704xfull, 704x576, 704x480, 352xfull,
++352x576, 352x480, 352xhalf, 352x288, 352x240, nopanscan, noletterbox, crop.
++Default is ntsc, 4:3, 720xfull</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>-a <TT
++CLASS="REPLACEABLE"
++><I
++>audio-opts</I
++></TT
++></TT
++>, <TT
++CLASS="LITERAL"
++>--audio=<TT
++CLASS="REPLACEABLE"
++><I
++>audio-opts</I
++></TT
++></TT
++></DT
++><DD
++><P
++>A plus (+) separated list of options for an audio
++track, with each track separated by a comma (,).  For example -a
++ac3+en,mp2+de specifies two audio tracks: the first is an English
++track encoded in AC3, the second is a German track encoded using
++MPEG-1 layer 2 compression.  ac3, mp2, pcm, dts, 16bps, 20bps, 24bps,
++drc, surround, nolang, 1ch, 2ch, 3ch, 4ch, 5ch, 6ch, 7ch, 8ch, and any
++two letter ISO 639 language abbreviation.  Default is 1 track, mp2,
++20bps, nolang, 2ch.  'ac3' implies drc, 6ch.</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>-s <TT
++CLASS="REPLACEABLE"
++><I
++>subpicture-opts</I
++></TT
++></TT
++>, <TT
++CLASS="LITERAL"
++>--subpictures=<TT
++CLASS="REPLACEABLE"
++><I
++>subpicture-opts</I
++></TT
++></TT
++></DT
++><DD
++><P
++>A plus (+) separated list of options for a subpicture
++track, with each track separated by a comma (,). nolang and any two
++letter language abbreviation (see -a) Default is no subpicture
++tracks.</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>-e <TT
++CLASS="REPLACEABLE"
++><I
++>entry(s)</I
++></TT
++></TT
++>, <TT
++CLASS="LITERAL"
++>--entry=<TT
++CLASS="REPLACEABLE"
++><I
++>entry(s)</I
++></TT
++></TT
++></DT
++><DD
++><P
++>Makes the current menu the default for certain
++circumstances. It is a comma separated list of any of:</P
++><P
++>for
++TOC menus: title</P
++><P
++>for VTS menus: root, ptt, audio,
++subtitle, angle</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>-p <TT
++CLASS="REPLACEABLE"
++><I
++>palette-file</I
++></TT
++></TT
++>, <TT
++CLASS="LITERAL"
++>--palette=<TT
++CLASS="REPLACEABLE"
++><I
++>palette-file</I
++></TT
++></TT
++></DT
++><DD
++><P
++>Specifies where to get the subpicture
++palette. Settable per title and per menu. If the filename ends in .rgb
++(case insensitive) then it is assumed to be RGB, otherwise it is
++YUV. Entries should be 6 hexadecimal
++digits. <TT
++CLASS="REPLACEABLE"
++><I
++>FILE</I
++></TT
++> defaults to
++xste-palette.dat</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>-c <TT
++CLASS="REPLACEABLE"
++><I
++>chapterpts</I
++></TT
++></TT
++>, <TT
++CLASS="LITERAL"
++>--chapters=<TT
++CLASS="REPLACEABLE"
++><I
++>chapterpts</I
++></TT
++></TT
++></DT
++><DD
++><P
++>Specifies a comma (,) separated list of chapter
++markers. Each marker is of the form [[h:]mm:]ss[.frac] and is relative
++to the SCR of the next file listed (independent of any timestamp
++transposing that occurs within dvdauthor). The chapter markers ONLY
++apply to the next file listed. Defaults to 0.</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>-f <TT
++CLASS="REPLACEABLE"
++><I
++>mpeg-file</I
++></TT
++></TT
++>, <TT
++CLASS="LITERAL"
++>--file=<TT
++CLASS="REPLACEABLE"
++><I
++>mpeg-file</I
++></TT
++></TT
++>, <TT
++CLASS="LITERAL"
++><TT
++CLASS="REPLACEABLE"
++><I
++>mpeg-file</I
++></TT
++></TT
++></DT
++><DD
++><P
++>Specifies either a file, a pipe, or a shell command
++ending in | which supplies an MPEG-2 system stream with VOB sectors
++inserted in the appropriate places (using mplex -f 8 to
++generate)</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>-b <TT
++CLASS="REPLACEABLE"
++><I
++>buttondef</I
++></TT
++></TT
++>, <TT
++CLASS="LITERAL"
++>--button=<TT
++CLASS="REPLACEABLE"
++><I
++>X1xY1-X2xY2,commandlist</I
++></TT
++></TT
++></DT
++><DD
++><P
++>creates a button of the specified size. See
++LANGUAGE DESCRIPTION for a description of <TT
++CLASS="REPLACEABLE"
++><I
++>commandlist</I
++></TT
++>.</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>-i <TT
++CLASS="REPLACEABLE"
++><I
++>[pre|post]=commandlist</I
++></TT
++></TT
++>, <TT
++CLASS="LITERAL"
++>--instructions=<TT
++CLASS="REPLACEABLE"
++><I
++>[pre|post]=commandlist</I
++></TT
++></TT
++></DT
++><DD
++><P
++>Executes the <TT
++CLASS="REPLACEABLE"
++><I
++>commandlist</I
++></TT
++>
++instructions either before or at the end of the menu/title.  See
++LANGUAGE DESCRIPTION for the format of <TT
++CLASS="REPLACEABLE"
++><I
++>commandlist.</I
++></TT
++></P
++></DD
++></DL
++></DIV
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN1913"
++></A
++><H2
++>XML Description</H2
++><P
++>Here is the basic structure of the configuration file:</P
++><PRE
++CLASS="SYNOPSIS"
++>&lt;dvdauthor [dest="<TT
++CLASS="REPLACEABLE"
++><I
++>output-dir</I
++></TT
++>"] [jumppad="1|on|yes" | allgprm="1|on|yes"]&gt;
++   &lt;vmgm&gt;
++      [&lt;fpc&gt;<TT
++CLASS="REPLACEABLE"
++><I
++>commands;</I
++></TT
++>&lt;/fpc&gt;]
++      &lt;menus [lang="<TT
++CLASS="REPLACEABLE"
++><I
++>language-code</I
++></TT
++>"] &gt;
++         &lt;video [format="ntsc|pal"] [aspect="4:3|16:9"]
++                [resolution="<TT
++CLASS="REPLACEABLE"
++><I
++>XxY</I
++></TT
++>"] [caption="field1|field2"]
++                [widescreen="nopanscan|noletterbox|crop"] /&gt;
++         &lt;audio [format="mp2|ac3|dts|pcm"] [channels="<TT
++CLASS="REPLACEABLE"
++><I
++>numchannels</I
++></TT
++>"]
++                [quant="16bps|20bps|24bps|drc"] [dolby="surround"]
++                [samplerate="48khz|96khz"] [lang="<TT
++CLASS="REPLACEABLE"
++><I
++>language</I
++></TT
++>"] /&gt;
++         [&lt;audio ... /&gt;]
++         &lt;subpicture lang="<TT
++CLASS="REPLACEABLE"
++><I
++>language</I
++></TT
++>" /&gt;
++         &lt;pgc [entry="title"] [palette="<TT
++CLASS="REPLACEABLE"
++><I
++>yuvfile|rgbfile</I
++></TT
++>"]
++              [pause="<TT
++CLASS="REPLACEABLE"
++><I
++>seconds</I
++></TT
++>|inf"]&gt;
++            &lt;pre&gt; <TT
++CLASS="REPLACEABLE"
++><I
++>commands;</I
++></TT
++> &lt;/pre&gt;
++            &lt;vob file="<TT
++CLASS="REPLACEABLE"
++><I
++>file.mpg</I
++></TT
++>" [chapters="<TT
++CLASS="REPLACEABLE"
++><I
++>chapter-list</I
++></TT
++>"]
++                 [pause="<TT
++CLASS="REPLACEABLE"
++><I
++>seconds</I
++></TT
++>|inf"] /&gt;
++            [&lt;vob ... /&gt;]
++            &lt;button [name="<TT
++CLASS="REPLACEABLE"
++><I
++>buttonname</I
++></TT
++>"]&gt; <TT
++CLASS="REPLACEABLE"
++><I
++>commands;</I
++></TT
++> &lt;/button&gt;
++            [&lt;button ... /&gt;]
++            &lt;post&gt; <TT
++CLASS="REPLACEABLE"
++><I
++>commands;</I
++></TT
++> &lt;/post&gt;
++         &lt;/pgc&gt;
++         [&lt;pgc ... /&gt;]
++      &lt;/menus&gt;
++   &lt;/vmgm&gt;
++   &lt;titleset&gt;
++      &lt;menus&gt;
++         [&lt;video ... /&gt;]
++         [&lt;audio ... /&gt;]
++         &lt;pgc [entry="<TT
++CLASS="REPLACEABLE"
++><I
++>entries</I
++></TT
++>"]
++              [palette="<TT
++CLASS="REPLACEABLE"
++><I
++>yuvfile|rgbfile</I
++></TT
++>"] [pause="<TT
++CLASS="REPLACEABLE"
++><I
++>seconds</I
++></TT
++>|inf"]&gt;
++            [...]
++         &lt;/pgc&gt;
++         [&lt;pgc ... /&gt;]
++      &lt;/menus&gt;
++      &lt;titles&gt;
++         [&lt;video ... /&gt;]
++         [&lt;audio ... /&gt;]
++         &lt;pgc [palette="<TT
++CLASS="REPLACEABLE"
++><I
++>yuvfile|rgbfile</I
++></TT
++>"] [pause="<TT
++CLASS="REPLACEABLE"
++><I
++>seconds</I
++></TT
++>|inf"]&gt;
++            [...]
++         &lt;/pgc&gt;
++         [&lt;pgc ... /&gt;]
++      &lt;/titles&gt;
++   &lt;/titleset&gt;
++   [&lt;titleset ... /&gt;]
++&lt;/dvdauthor&gt;</PRE
++><P
++>A breakdown of the config file:</P
++><P
++></P
++><DIV
++CLASS="VARIABLELIST"
++><DL
++><DT
++><TT
++CLASS="LITERAL"
++>&lt;dvdauthor [dest="<TT
++CLASS="REPLACEABLE"
++><I
++>output-dir</I
++></TT
++>"] [jumppad="1|on|yes" | allgprm="1|on|yes"]&gt;</TT
++></DT
++><DD
++><P
++>Initiates dvdauthor.  <TT
++CLASS="LITERAL"
++>dest</TT
++> denotes the directory where <B
++CLASS="COMMAND"
++>dvdauthor</B
++> will write the files.  It overrides the <TT
++CLASS="LITERAL"
++>-o</TT
++> option.  Contains up to one <TT
++CLASS="LITERAL"
++>&lt;vmgm&gt;</TT
++> tag and any number of <TT
++CLASS="LITERAL"
++>&lt;titleset&gt;</TT
++>'s.</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>&lt;vmgm&gt;</TT
++>, <TT
++CLASS="LITERAL"
++>&lt;titleset&gt;</TT
++></DT
++><DD
++><P
++>Constructs of a VMGM level menu set or a title set.
++Contains up to one <TT
++CLASS="LITERAL"
++>&lt;menus&gt;</TT
++> tag and if a
++titleset, up to one <TT
++CLASS="LITERAL"
++>&lt;titles&gt;</TT
++> tag.</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>&lt;menus
++[lang="<TT
++CLASS="REPLACEABLE"
++><I
++>language-code</I
++></TT
++>"]
++&gt;</TT
++>, <TT
++CLASS="LITERAL"
++>&lt;titles&gt;</TT
++></DT
++><DD
++><P
++>Marks the list of menus or titles for this VMGM menu
++set or titleset, called in <B
++CLASS="COMMAND"
++>dvdauthor</B
++> terminology a
++"pgcgroup."  Contains up to one <TT
++CLASS="LITERAL"
++>&lt;video&gt;</TT
++> tag,
++up to eight <TT
++CLASS="LITERAL"
++>&lt;audio&gt;</TT
++> tags, up to 32
++<TT
++CLASS="LITERAL"
++>&lt;subpicture&gt;</TT
++> tags, and any number of
++<TT
++CLASS="LITERAL"
++>&lt;pgc&gt;</TT
++> tags.</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>&lt;video [format="ntsc|pal"]
++[aspect="4:3|16:9"] [resolution="<TT
++CLASS="REPLACEABLE"
++><I
++>XxY</I
++></TT
++>"]
++[caption="field1|field2"] [widescreen="nopanscan|noletterbox|crop"]
++/&gt;</TT
++></DT
++><DD
++><P
++> Manually configures the video
++parameters for this pgcgroup.  If any of these are not set, then they
++will be inferred from the source stream.  Note that the DVD format
++only specifically supports 720x480, 704x480, 352x480, and 352x240
++resolutions for NTSC, and 720x576, 704x576, 352x576, and 352x288
++resolutions for PAL, but DVD author will accept a wider range of
++inputs and round up to the nearest size.</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>&lt;audio [format="mp2|ac3|dts|pcm"]
++[channels="<TT
++CLASS="REPLACEABLE"
++><I
++>numchannels</I
++></TT
++>"]
++[dolby="surround"] [quant="16bps|20bps|24bps|drc"] [samplerate="48khz|96khz"]
++[lang="<TT
++CLASS="REPLACEABLE"
++><I
++>language</I
++></TT
++>"] /&gt;</TT
++></DT
++><DD
++><P
++>Manually configures an audio channel for this
++pgcgroup.  List once for each channel.  Most parameters are inferred
++automatically from the source VOBs except for PCM parameters.
++However, language must be manually specified.  Note that it is
++possible to just list the language attribute and let
++<B
++CLASS="COMMAND"
++>dvdauthor</B
++> fill in the rest.</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>&lt;subpicture
++lang="<TT
++CLASS="REPLACEABLE"
++><I
++>language</I
++></TT
++>" /&gt;</TT
++></DT
++><DD
++><P
++>foo</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>&lt;pgc
++[entry="<TT
++CLASS="REPLACEABLE"
++><I
++>entries</I
++></TT
++>"]
++[palette="<TT
++CLASS="REPLACEABLE"
++><I
++>yuvfile|rgbfile</I
++></TT
++>"]
++[pause="<TT
++CLASS="REPLACEABLE"
++><I
++>seconds</I
++></TT
++>|inf"]&gt;</TT
++></DT
++><DD
++><P
++>A PGC is just a fancy term for either a menu or a
++title.  It has a special meaning in the DVD spec so I have retained
++its use here.  PGC's can have commands that get executed before they
++start playing or after they finish; see <TT
++CLASS="LITERAL"
++>pre</TT
++> and
++<TT
++CLASS="LITERAL"
++>post</TT
++> tags below.</P
++><P
++>If the PGC is a menu, you can specify one or more entries for
++it.  This means that if you press the corresponding button on your DVD
++remote, then it will go to this menu.  For a VMGM level menu, the only
++choice is <TT
++CLASS="LITERAL"
++>title</TT
++>, which on my remote corresponds to
++the <TT
++CLASS="LITERAL"
++>top menu</TT
++> button.  For a titleset level menu,
++you can use root, subtitle, audio, angle, and ptt.  If you want more
++than one, separate them by a space or a comma.  Note that
++<TT
++CLASS="LITERAL"
++>root</TT
++> entry is meant for commands that jump from a
++VMGM level menu to a titleset menu.</P
++><P
++>All button and menu masks and all subtitles within a PGC must
++share the same 16 color palette.  If you use <B
++CLASS="COMMAND"
++>spumux</B
++>
++to generate the subtitle/subpicture packets, then the color
++information will be automatically passed to
++<B
++CLASS="COMMAND"
++>dvdauthor</B
++>; however, if you use another subtitler or
++want to have more control over the palette, you can manually specify
++it with the <TT
++CLASS="LITERAL"
++>palette</TT
++> attribute.  The first 16
++entries of the file should be the 16 colors of the palette, listed as
++6 digit hexadecimal numbers representing either the RGB breakdown (if
++the filename ends in <TT
++CLASS="LITERAL"
++>.rgb</TT
++> or the YUV breakdown (if
++the filename does not end in <TT
++CLASS="LITERAL"
++>.rgb</TT
++>.  After that, the
++button group information can be listed as pairs of 8 digit hexadecimal
++numbers; up to three button groups may be specified.</P
++><P
++>If you have a short video sequence or just want the video to
++pause at the end, you can use the <TT
++CLASS="LITERAL"
++>pause</TT
++> attribute
++to set the number of seconds (as an integer) from 1 to 254.  If you
++want the video to pause indefinitely, use
++<TT
++CLASS="LITERAL"
++>inf</TT
++>.</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>&lt;pre&gt; <TT
++CLASS="REPLACEABLE"
++><I
++>commands;</I
++></TT
++> &lt;/pre&gt;</TT
++>, <TT
++CLASS="LITERAL"
++>&lt;post&gt; <TT
++CLASS="REPLACEABLE"
++><I
++>commands;</I
++></TT
++> &lt;/post&gt;</TT
++></DT
++><DD
++><P
++> Sets the commands to execute before or after a PGC
++plays.  It can be used to loop the current video (by having a
++<TT
++CLASS="LITERAL"
++>&lt;post&gt; jump ... &lt;/post&gt;</TT
++> sequence), or to
++conditionally skip certain chapters if a flag has been set.</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>&lt;fpc&gt; <TT
++CLASS="REPLACEABLE"
++><I
++>commands;</I
++></TT
++> &lt;/fpc&gt;</TT
++></DT
++><DD
++><P
++> Sets the commands to execute when the disk is first
++put in the player (FPC = First Program Chain).  It can be used to jump
++to a particular menu or initialize registers on startup.  If not
++specified, an implicit one will be created that jumps to the first
++menu found, or if there is no menu it will jump to the first title..</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>&lt;vob file="<TT
++CLASS="REPLACEABLE"
++><I
++>file.mpg</I
++></TT
++>" [chapters="<TT
++CLASS="REPLACEABLE"
++><I
++>chapter-list</I
++></TT
++>"] [pause="<TT
++CLASS="REPLACEABLE"
++><I
++>seconds</I
++></TT
++>|inf"] /&gt;</TT
++></DT
++><DD
++><P
++>foo</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>&lt;cell [start="<TT
++CLASS="REPLACEABLE"
++><I
++>timestamp</I
++></TT
++>"] [end="<TT
++CLASS="REPLACEABLE"
++><I
++>timestamp</I
++></TT
++>"] [chapter="1|on|yes" | program="1|on|yes"] [pause="<TT
++CLASS="REPLACEABLE"
++><I
++>seconds</I
++></TT
++>|inf"] /&gt;</TT
++></DT
++><DD
++><P
++>foo</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>&lt;button [name="<TT
++CLASS="REPLACEABLE"
++><I
++>buttonname</I
++></TT
++>"]&gt; <TT
++CLASS="REPLACEABLE"
++><I
++>commands;</I
++></TT
++> &lt;/button&gt;</TT
++></DT
++><DD
++><P
++>foo</P
++></DD
++></DL
++></DIV
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2055"
++></A
++><H2
++>Language Description</H2
++><P
++>The language is quite simple and roughly looks like C.</P
++><P
++></P
++><UL
++><LI
++><P
++>Statements are terminated with a semicolon.</P
++></LI
++><LI
++><P
++>Statements can span multiple lines.</P
++></LI
++><LI
++><P
++>Multiple statements can appear on one line.</P
++></LI
++><LI
++><P
++>Whitespace (space, tab, newlines) are not important, except to separate keywords and identifiers.</P
++></LI
++></UL
++><DIV
++CLASS="REFSECT2"
++><A
++NAME="AEN2067"
++></A
++><H3
++>Variables</H3
++><P
++>The DVD virtual machine processes 16 bit values.  It supports up
++to 16 general purpose registers; however <B
++CLASS="COMMAND"
++>dvdauthor</B
++>
++reserves 3 for internal use.  Thus register 0-12 are avaialable for
++use and are referred to as <TT
++CLASS="LITERAL"
++>g0</TT
++> through
++<TT
++CLASS="LITERAL"
++>g12</TT
++>.</P
++><P
++>There are also 24 system registers, which can be referred to as
++<TT
++CLASS="LITERAL"
++>s0</TT
++> through <TT
++CLASS="LITERAL"
++>s23</TT
++>.  Not all of
++these can be set.  Many of these have pseodonyms.</P
++><DIV
++CLASS="GLOSSLIST"
++><DL
++><DT
++><B
++><TT
++CLASS="LITERAL"
++>audio</TT
++>
++(<TT
++CLASS="LITERAL"
++>s1</TT
++>, rw)</B
++></DT
++><DD
++><P
++>Denotes the
++audio channel, ranging from 0-7.</P
++></DD
++><DT
++><B
++><TT
++CLASS="LITERAL"
++>subtitle</TT
++>
++(<TT
++CLASS="LITERAL"
++>s2</TT
++>, rw)</B
++></DT
++><DD
++><P
++>The subtitle
++track, ranging from 0-31.  If you want the subtitle to always be
++displayed, then you should add 64 (i.e. choose 64-95).  Simply
++selecting the track (0-31) means that only the forced subtitles will
++be displayed, whereas enabling the track (64-95) means that all the
++subtitles will be displayed.  This allows you to have forced subtitles
++only for the parts of the movie where the actors are speaking a
++foreign (to the viewer) language, but still have normal subtitles for
++the hearing impaired.  The hearing impaired viewers would enable the
++track (64-95) while the other viewers would just select the track
++(0-31) they would be able to share the
++track.</P
++></DD
++><DT
++><B
++><TT
++CLASS="LITERAL"
++>angle</TT
++>
++(<TT
++CLASS="LITERAL"
++>s3</TT
++>, rw)</B
++></DT
++><DD
++><P
++>Selects the
++angle (currently untested).</P
++></DD
++><DT
++><B
++><TT
++CLASS="LITERAL"
++>button</TT
++>
++(<TT
++CLASS="LITERAL"
++>s8</TT
++>, rw)</B
++></DT
++><DD
++><P
++>Denotes the
++currently highlighted button.  Note that the value is multiplied by
++1024, so the first button is 1024, the second is 2048,
++etc.</P
++></DD
++></DL
++></DIV
++></DIV
++><DIV
++CLASS="REFSECT2"
++><A
++NAME="AEN2101"
++></A
++><H3
++>Expressions</H3
++><P
++>Expressions follow typical C syntax except that booleans are not
++convertible to integers and vice versa.  Operators and comparisons
++are:</P
++><P
++><TT
++CLASS="LITERAL"
++>==</TT
++>, <TT
++CLASS="LITERAL"
++>!=</TT
++>, <TT
++CLASS="LITERAL"
++>&gt;=</TT
++>, <TT
++CLASS="LITERAL"
++>&gt;</TT
++>, <TT
++CLASS="LITERAL"
++>&lt;=</TT
++>, <TT
++CLASS="LITERAL"
++>&lt;</TT
++>, <TT
++CLASS="LITERAL"
++>&amp;&amp;</TT
++>, <TT
++CLASS="LITERAL"
++>||</TT
++>, <TT
++CLASS="LITERAL"
++>!</TT
++>, <TT
++CLASS="LITERAL"
++>eq</TT
++>, <TT
++CLASS="LITERAL"
++>ne</TT
++>, <TT
++CLASS="LITERAL"
++>ge</TT
++>, <TT
++CLASS="LITERAL"
++>gt</TT
++>, <TT
++CLASS="LITERAL"
++>le</TT
++>, <TT
++CLASS="LITERAL"
++>lt</TT
++>, <TT
++CLASS="LITERAL"
++>and</TT
++>, <TT
++CLASS="LITERAL"
++>or</TT
++>, <TT
++CLASS="LITERAL"
++>xor</TT
++>, <TT
++CLASS="LITERAL"
++>not</TT
++>, <TT
++CLASS="LITERAL"
++>+</TT
++>, <TT
++CLASS="LITERAL"
++>-</TT
++>, <TT
++CLASS="LITERAL"
++>*</TT
++>, <TT
++CLASS="LITERAL"
++>/</TT
++>, <TT
++CLASS="LITERAL"
++>%</TT
++>, <TT
++CLASS="LITERAL"
++>&#38;</TT
++>, <TT
++CLASS="LITERAL"
++>|</TT
++>, <TT
++CLASS="LITERAL"
++>^</TT
++></P
++><P
++>Since the code is encapsulated in XML, the parser will catch any
++unescaped &lt; characters, thus alphabetic mnemonics have been
++provided for all comparison operators for consistency.</P
++><P
++>There is also a numerical function:</P
++><P
++></P
++><DIV
++CLASS="VARIABLELIST"
++><DL
++><DT
++><TT
++CLASS="LITERAL"
++>random(<TT
++CLASS="REPLACEABLE"
++><I
++>EXPRESSION</I
++></TT
++>)</TT
++></DT
++><DD
++><P
++>Computes a psuedo-random number, between 1 and the
++supplied number, inclusively.</P
++></DD
++></DL
++></DIV
++></DIV
++><DIV
++CLASS="REFSECT2"
++><A
++NAME="AEN2169"
++></A
++><H3
++>Blocks</H3
++><P
++>Blocks are either a single statement (terminated by a
++semicolon), or a group of statements wrapped in curly braces.  For
++example:</P
++><P
++></P
++><UL
++><LI
++><PRE
++CLASS="SYNOPSIS"
++>g3=s7;</PRE
++></LI
++><LI
++><PRE
++CLASS="SYNOPSIS"
++>{
++  audio=1;
++  subtitle=65;
++  jump vmgm menu 3;
++}</PRE
++></LI
++></UL
++></DIV
++><DIV
++CLASS="REFSECT2"
++><A
++NAME="AEN2177"
++></A
++><H3
++>Statements</H3
++><P
++>The statements supported are fairly simple at the moment.</P
++><P
++></P
++><DIV
++CLASS="VARIABLELIST"
++><DL
++><DT
++><TT
++CLASS="LITERAL"
++><TT
++CLASS="REPLACEABLE"
++><I
++>VARIABLE</I
++></TT
++>=<TT
++CLASS="REPLACEABLE"
++><I
++>EXPRESSION</I
++></TT
++>;</TT
++></DT
++><DD
++><P
++>Sets a variable equal to the result of an equation.</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>if (<TT
++CLASS="REPLACEABLE"
++><I
++>EXPRESSION</I
++></TT
++>) <TT
++CLASS="REPLACEABLE"
++><I
++>BLOCK;</I
++></TT
++></TT
++>, <TT
++CLASS="LITERAL"
++>if (<TT
++CLASS="REPLACEABLE"
++><I
++>EXPRESSION</I
++></TT
++>) <TT
++CLASS="REPLACEABLE"
++><I
++>BLOCK;</I
++></TT
++> else <TT
++CLASS="REPLACEABLE"
++><I
++>BLOCK;</I
++></TT
++></TT
++></DT
++><DD
++><P
++>Calculates the expression; if true, then it executes
++the block of code.</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>jump <TT
++CLASS="REPLACEABLE"
++><I
++>TARGET</I
++></TT
++>;</TT
++>, <TT
++CLASS="LITERAL"
++>call <TT
++CLASS="REPLACEABLE"
++><I
++>TARGET</I
++></TT
++> [resume <TT
++CLASS="REPLACEABLE"
++><I
++>CELL</I
++></TT
++>];</TT
++>, <TT
++CLASS="LITERAL"
++>resume;</TT
++></DT
++><DD
++><P
++>Jumps to a particular title or menu, or calls a
++particular menu, or returns to the calling title.  You can only
++execute a call from a title to a menu; all other forms are illegal.
++The purpose of using <TT
++CLASS="LITERAL"
++>call</TT
++> instead of
++<TT
++CLASS="LITERAL"
++>jump</TT
++> (besides the fact that they support a mutually
++exclusive list of targets) is to allow the menu to return to the point
++in the title where the call originated using
++<TT
++CLASS="LITERAL"
++>resume</TT
++>.  You can manually specify the return cell
++by using the <TT
++CLASS="LITERAL"
++>resume</TT
++> keyword, however if you do not
++specify one and you use the command in a post instruction block, then
++it will presume cell 1.</P
++><P
++>The following are possible targets:</P
++><P
++></P
++><DIV
++CLASS="VARIABLELIST"
++><DL
++><DT
++><TT
++CLASS="LITERAL"
++>[vmgm | titleset <TT
++CLASS="REPLACEABLE"
++><I
++>X</I
++></TT
++>] menu</TT
++>, <TT
++CLASS="LITERAL"
++>[vmgm | titleset <TT
++CLASS="REPLACEABLE"
++><I
++>X</I
++></TT
++>] menu <TT
++CLASS="REPLACEABLE"
++><I
++>Y</I
++></TT
++></TT
++>, <TT
++CLASS="LITERAL"
++>[vmgm | titleset <TT
++CLASS="REPLACEABLE"
++><I
++>X</I
++></TT
++>] menu entry <TT
++CLASS="REPLACEABLE"
++><I
++>Z</I
++></TT
++></TT
++></DT
++><DD
++><P
++>Targets either the default menu, a menu number Y, or the menu denoted as the entry for Z.  The menu is in either the VMGM or titleset domain.  If you wish to target a menu in the current domain then you can omit the domain moniker.</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>[vmgm | titleset <TT
++CLASS="REPLACEABLE"
++><I
++>X</I
++></TT
++>] title <TT
++CLASS="REPLACEABLE"
++><I
++>Y</I
++></TT
++> [chapter <TT
++CLASS="REPLACEABLE"
++><I
++>Z</I
++></TT
++>]</TT
++></DT
++><DD
++><P
++>Targets a title, or a chapter in a title.  Numbering
++starts at 1.  All of the titles on the disc are accessible in the VMGM
++domain, or you can access them by titleset
++instead.</P
++></DD
++><DT
++><TT
++CLASS="LITERAL"
++>chapter <TT
++CLASS="REPLACEABLE"
++><I
++>Z</I
++></TT
++></TT
++>, <TT
++CLASS="LITERAL"
++>program <TT
++CLASS="REPLACEABLE"
++><I
++>Z</I
++></TT
++></TT
++>, <TT
++CLASS="LITERAL"
++>cell <TT
++CLASS="REPLACEABLE"
++><I
++>Z</I
++></TT
++></TT
++></DT
++><DD
++><P
++>Targets a chapter, program, or cell in the current
++title or menu (note that menus do not have chapters).  You can use
++this to create looping menus: <TT
++CLASS="LITERAL"
++>jump cell
++1;</TT
++></P
++></DD
++></DL
++></DIV
++></DD
++></DL
++></DIV
++></DIV
++></DIV
++><DIV
++CLASS="NAVFOOTER"
++><HR
++ALIGN="LEFT"
++WIDTH="100%"><TABLE
++SUMMARY="Footer navigation table"
++WIDTH="100%"
++BORDER="0"
++CELLPADDING="0"
++CELLSPACING="0"
++><TR
++><TD
++WIDTH="33%"
++ALIGN="left"
++VALIGN="top"
++><A
++HREF="manpages.html"
++ACCESSKEY="P"
++>Prev</A
++></TD
++><TD
++WIDTH="34%"
++ALIGN="center"
++VALIGN="top"
++><A
++HREF="index.html"
++ACCESSKEY="H"
++>Home</A
++></TD
++><TD
++WIDTH="33%"
++ALIGN="right"
++VALIGN="top"
++><A
++HREF="r2253.html"
++ACCESSKEY="N"
++>Next</A
++></TD
++></TR
++><TR
++><TD
++WIDTH="33%"
++ALIGN="left"
++VALIGN="top"
++>DVDAuthor Man Pages</TD
++><TD
++WIDTH="34%"
++ALIGN="center"
++VALIGN="top"
++><A
++HREF="manpages.html"
++ACCESSKEY="U"
++>Up</A
++></TD
++><TD
++WIDTH="33%"
++ALIGN="right"
++VALIGN="top"
++>dvddirdel</TD
++></TR
++></TABLE
++></DIV
++></BODY
++></HTML
++>
+\ No newline at end of file
+Index: dvdauthor-0.6.14/html/ex-title.html
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ dvdauthor-0.6.14/html/ex-title.html	2010-01-04 14:32:00.000000000 +0100
+@@ -0,0 +1,361 @@
++<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
++<HTML
++><HEAD
++><TITLE
++>Creating a title</TITLE
++><META
++NAME="GENERATOR"
++CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
++REL="HOME"
++TITLE="DVDAuthor"
++HREF="index.html"><LINK
++REL="UP"
++TITLE="Examples"
++HREF="examples.html"><LINK
++REL="PREVIOUS"
++TITLE="Examples"
++HREF="examples.html"><LINK
++REL="NEXT"
++TITLE="Language Codes"
++HREF="languages.html"></HEAD
++><BODY
++CLASS="SECT1"
++BGCOLOR="#FFFFFF"
++TEXT="#000000"
++LINK="#0000FF"
++VLINK="#840084"
++ALINK="#0000FF"
++><DIV
++CLASS="NAVHEADER"
++><TABLE
++SUMMARY="Header navigation table"
++WIDTH="100%"
++BORDER="0"
++CELLPADDING="0"
++CELLSPACING="0"
++><TR
++><TH
++COLSPAN="3"
++ALIGN="center"
++>DVDAuthor</TH
++></TR
++><TR
++><TD
++WIDTH="10%"
++ALIGN="left"
++VALIGN="bottom"
++><A
++HREF="examples.html"
++ACCESSKEY="P"
++>Prev</A
++></TD
++><TD
++WIDTH="80%"
++ALIGN="center"
++VALIGN="bottom"
++>Chapter 1. Examples</TD
++><TD
++WIDTH="10%"
++ALIGN="right"
++VALIGN="bottom"
++><A
++HREF="languages.html"
++ACCESSKEY="N"
++>Next</A
++></TD
++></TR
++></TABLE
++><HR
++ALIGN="LEFT"
++WIDTH="100%"></DIV
++><DIV
++CLASS="SECT1"
++><H1
++CLASS="SECT1"
++><A
++NAME="EX-TITLE"
++>1.2. Creating a title</A
++></H1
++><DIV
++CLASS="SECT2"
++><H2
++CLASS="SECT2"
++><A
++NAME="AEN37"
++>1.2.1. One chapter, one source</A
++></H2
++><P
++>This forms the most basic DVD.  THe DVD player will start playing the movie when the disc is inserted and will stop at the end.</P
++><PRE
++CLASS="PROGRAMLISTING"
++>&#60;dvdauthor&#62;
++    &#60;vmgm /&#62;
++    &#60;titleset&#62;
++        &#60;titles&#62;
++            &#60;pgc&#62;
++                &#60;vob file="video.mpg" /&#62;
++            &#60;/pgc&#62;
++        &#60;/titles&#62;
++    &#60;/titleset&#62;
++&#60;/dvdauthor&#62;</PRE
++></DIV
++><DIV
++CLASS="SECT2"
++><H2
++CLASS="SECT2"
++><A
++NAME="AEN41"
++>1.2.2. Two chapters, two sources</A
++></H2
++><P
++>Adding a second chapter is quite simple if it is in a separate file.</P
++><PRE
++CLASS="PROGRAMLISTING"
++>&#60;dvdauthor&#62;
++    &#60;vmgm /&#62;
++    &#60;titleset&#62;
++        &#60;titles&#62;
++            &#60;pgc&#62;
++                &#60;vob file="video1.mpg" /&#62;
++                &#60;vob file="video2.mpg" /&#62;
++            &#60;/pgc&#62;
++        &#60;/titles&#62;
++    &#60;/titleset&#62;
++&#60;/dvdauthor&#62;</PRE
++></DIV
++><DIV
++CLASS="SECT2"
++><H2
++CLASS="SECT2"
++><A
++NAME="AEN45"
++>1.2.3. One chapter, two sources</A
++></H2
++><P
++><SPAN
++CLASS="APPLICATION"
++>DVDAuthor</SPAN
++> normally creates one
++chapter per file.  This can be overridden using
++<TT
++CLASS="LITERAL"
++>chapters="<TT
++CLASS="REPLACEABLE"
++><I
++>foo</I
++></TT
++>"</TT
++>.  The
++parameter is a comma separated list of timestamps of the form
++<TT
++CLASS="LITERAL"
++>[[<TT
++CLASS="REPLACEABLE"
++><I
++>HH</I
++></TT
++>:]<TT
++CLASS="REPLACEABLE"
++><I
++>MM</I
++></TT
++>:]<TT
++CLASS="REPLACEABLE"
++><I
++>SS</I
++></TT
++></TT
++>.</P
++><PRE
++CLASS="PROGRAMLISTING"
++>&#60;dvdauthor&#62;
++    &#60;vmgm /&#62;
++    &#60;titleset&#62;
++        &#60;titles&#62;
++            &#60;pgc&#62;
++                &#60;vob file="video1.mpg" chapters="0" /&#62;
++                &#60;vob file="video2.mpg" /&#62;
++            &#60;/pgc&#62;
++        &#60;/titles&#62;
++    &#60;/titleset&#62;
++&#60;/dvdauthor&#62;</PRE
++></DIV
++><DIV
++CLASS="SECT2"
++><H2
++CLASS="SECT2"
++><A
++NAME="AEN56"
++>1.2.4. Two chapters, one source</A
++></H2
++><P
++>This will create a movie with two chapters, one at the beginning (which is always required) and one five minutes into the video.</P
++><PRE
++CLASS="PROGRAMLISTING"
++>&#60;dvdauthor&#62;
++    &#60;vmgm /&#62;
++    &#60;titleset&#62;
++        &#60;titles&#62;
++            &#60;pgc&#62;
++                &#60;vob file="video1.mpg" chapters="0,5:00" /&#62;
++            &#60;/pgc&#62;
++        &#60;/titles&#62;
++    &#60;/titleset&#62;
++&#60;/dvdauthor&#62;</PRE
++></DIV
++><DIV
++CLASS="SECT2"
++><H2
++CLASS="SECT2"
++><A
++NAME="AEN60"
++>1.2.5. Looping</A
++></H2
++><P
++>Having <TT
++CLASS="LITERAL"
++>&lt;post&gt;</TT
++>commands will alter what happens when playback reaches the end of your title.  You can repeat the current title by jumping to the first chapter.</P
++><PRE
++CLASS="PROGRAMLISTING"
++>&#60;dvdauthor&#62;
++    &#60;vmgm /&#62;
++    &#60;titleset&#62;
++        &#60;titles&#62;
++            &#60;pgc&#62;
++                &#60;vob file="video1.mpg" /&#62;
++                &#60;post&#62;
++                    jump chapter 1;
++                &#60;/post&#62;
++            &#60;/pgc&#62;
++        &#60;/titles&#62;
++    &#60;/titleset&#62;
++&#60;/dvdauthor&#62;</PRE
++></DIV
++><DIV
++CLASS="SECT2"
++><H2
++CLASS="SECT2"
++><A
++NAME="AEN65"
++>1.2.6. Pausing</A
++></H2
++><P
++>Having <TT
++CLASS="LITERAL"
++>pause="<TT
++CLASS="REPLACEABLE"
++><I
++>foo</I
++></TT
++>"</TT
++>
++will cause playback to pause for either the specified number of
++seconds or indefinitely (<TT
++CLASS="LITERAL"
++>inf</TT
++>).  This can be used
++either at the end of the title (by supplying it as an attribute to
++<TT
++CLASS="LITERAL"
++>pgc</TT
++> or at the end of a particular source, as an
++attribute to <TT
++CLASS="LITERAL"
++>vob</TT
++>.  The following will pause
++indefinitely at the end of the title:</P
++><PRE
++CLASS="PROGRAMLISTING"
++>&#60;dvdauthor&#62;
++    &#60;vmgm /&#62;
++    &#60;titleset&#62;
++        &#60;titles&#62;
++            &#60;pgc pause="inf"&#62;
++                &#60;vob file="video1.mpg" /&#62;
++            &#60;/pgc&#62;
++        &#60;/titles&#62;
++    &#60;/titleset&#62;
++&#60;/dvdauthor&#62;</PRE
++><P
++>while the following will pause for 5 seconds after the first chapter:</P
++><PRE
++CLASS="PROGRAMLISTING"
++>&#60;dvdauthor&#62;
++    &#60;vmgm /&#62;
++    &#60;titleset&#62;
++        &#60;titles&#62;
++            &#60;pgc&#62;
++                &#60;vob file="video1.mpg" pause="5" /&#62;
++                &#60;vob file="video2.mpg" /&#62;
++            &#60;/pgc&#62;
++        &#60;/titles&#62;
++    &#60;/titleset&#62;
++&#60;/dvdauthor&#62;</PRE
++></DIV
++></DIV
++><DIV
++CLASS="NAVFOOTER"
++><HR
++ALIGN="LEFT"
++WIDTH="100%"><TABLE
++SUMMARY="Footer navigation table"
++WIDTH="100%"
++BORDER="0"
++CELLPADDING="0"
++CELLSPACING="0"
++><TR
++><TD
++WIDTH="33%"
++ALIGN="left"
++VALIGN="top"
++><A
++HREF="examples.html"
++ACCESSKEY="P"
++>Prev</A
++></TD
++><TD
++WIDTH="34%"
++ALIGN="center"
++VALIGN="top"
++><A
++HREF="index.html"
++ACCESSKEY="H"
++>Home</A
++></TD
++><TD
++WIDTH="33%"
++ALIGN="right"
++VALIGN="top"
++><A
++HREF="languages.html"
++ACCESSKEY="N"
++>Next</A
++></TD
++></TR
++><TR
++><TD
++WIDTH="33%"
++ALIGN="left"
++VALIGN="top"
++>Examples</TD
++><TD
++WIDTH="34%"
++ALIGN="center"
++VALIGN="top"
++><A
++HREF="examples.html"
++ACCESSKEY="U"
++>Up</A
++></TD
++><TD
++WIDTH="33%"
++ALIGN="right"
++VALIGN="top"
++>Language Codes</TD
++></TR
++></TABLE
++></DIV
++></BODY
++></HTML
++>
+\ No newline at end of file
+Index: dvdauthor-0.6.14/html/examples.html
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ dvdauthor-0.6.14/html/examples.html	2010-01-04 14:32:00.000000000 +0100
+@@ -0,0 +1,247 @@
++<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
++<HTML
++><HEAD
++><TITLE
++>Examples</TITLE
++><META
++NAME="GENERATOR"
++CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
++REL="HOME"
++TITLE="DVDAuthor"
++HREF="index.html"><LINK
++REL="PREVIOUS"
++TITLE="DVDAuthor"
++HREF="index.html"><LINK
++REL="NEXT"
++TITLE="Creating a title"
++HREF="ex-title.html"></HEAD
++><BODY
++CLASS="CHAPTER"
++BGCOLOR="#FFFFFF"
++TEXT="#000000"
++LINK="#0000FF"
++VLINK="#840084"
++ALINK="#0000FF"
++><DIV
++CLASS="NAVHEADER"
++><TABLE
++SUMMARY="Header navigation table"
++WIDTH="100%"
++BORDER="0"
++CELLPADDING="0"
++CELLSPACING="0"
++><TR
++><TH
++COLSPAN="3"
++ALIGN="center"
++>DVDAuthor</TH
++></TR
++><TR
++><TD
++WIDTH="10%"
++ALIGN="left"
++VALIGN="bottom"
++><A
++HREF="index.html"
++ACCESSKEY="P"
++>Prev</A
++></TD
++><TD
++WIDTH="80%"
++ALIGN="center"
++VALIGN="bottom"
++></TD
++><TD
++WIDTH="10%"
++ALIGN="right"
++VALIGN="bottom"
++><A
++HREF="ex-title.html"
++ACCESSKEY="N"
++>Next</A
++></TD
++></TR
++></TABLE
++><HR
++ALIGN="LEFT"
++WIDTH="100%"></DIV
++><DIV
++CLASS="CHAPTER"
++><H1
++><A
++NAME="EXAMPLES"
++></A
++>Chapter 1. Examples</H1
++><DIV
++CLASS="SECT1"
++><H1
++CLASS="SECT1"
++><A
++NAME="EX-TOOLS"
++>1.1. Running the tools</A
++></H1
++><DIV
++CLASS="SECT2"
++><H2
++CLASS="SECT2"
++><A
++NAME="AEN7"
++>1.1.1. Creating the DVD filesystem with dvdauthor</A
++></H2
++><P
++>In these examples, <B
++CLASS="COMMAND"
++>dvdauthor</B
++> is run as:</P
++><PRE
++CLASS="PROGRAMLISTING"
++>rm -r test &#38;&#38; dvdauthor -o test -x dvdauthor.xml</PRE
++><P
++>It will create or append to the directory specified, so it is a
++good idea to remove the directory before running
++<B
++CLASS="COMMAND"
++>dvdauthor</B
++>, otherwise the resulting structure will
++not be playable.</P
++></DIV
++><DIV
++CLASS="SECT2"
++><H2
++CLASS="SECT2"
++><A
++NAME="AEN14"
++>1.1.2. Adding subtitles with spumux</A
++></H2
++><P
++><B
++CLASS="COMMAND"
++>spumux</B
++> takes an mpeg2 program stream as input and spits one back out, with subtitles multiplexed in.  It is run as:</P
++><PRE
++CLASS="PROGRAMLISTING"
++>spumux spumux.xml &lt; input.mpg &gt; output.mpg</PRE
++></DIV
++><DIV
++CLASS="SECT2"
++><H2
++CLASS="SECT2"
++><A
++NAME="AEN19"
++>1.1.3. Creating a movie source from video and audio with mplex</A
++></H2
++><P
++><B
++CLASS="COMMAND"
++>mplex</B
++> comes from the mjpegtools package,
++available at http://mjpeg.sourceforge.net.  It can take independent
++video and audio streams and create a single mpeg2 stream.</P
++><PRE
++CLASS="PROGRAMLISTING"
++>mplex -f 8 -o output.mpg video.m2v audio.m2a</PRE
++></DIV
++><DIV
++CLASS="SECT2"
++><H2
++CLASS="SECT2"
++><A
++NAME="AEN24"
++>1.1.4. Creating video from bitmap images with mpeg2enc</A
++></H2
++><P
++>When creating menus, it is necessary to create an mpeg2 video stream from one or more bitmap images.  For NTSC you can do:</P
++><PRE
++CLASS="PROGRAMLISTING"
++>ppmtoy4m | mpeg2enc -a 2 -n n -f 8 -o output.m2v</PRE
++><P
++>and for PAL you can do:</P
++><PRE
++CLASS="PROGRAMLISTING"
++>ppmtoy4m | mpeg2enc -a 2 -n p -f 8 -o output.m2v</PRE
++></DIV
++><DIV
++CLASS="SECT2"
++><H2
++CLASS="SECT2"
++><A
++NAME="AEN30"
++>1.1.5. Creating a blank audio track with toolame</A
++></H2
++><P
++>When creating menus with no sound, it is necessary to multiplex
++in an empty sound file.  At 48kHz, NTSC has 1601.6 audio samples per
++frame while PAL has 1920 audio samples per frame.  Determine how many
++samples you need, and run:</P
++><PRE
++CLASS="PROGRAMLISTING"
++>dd if=/dev/zero bs=4 count=<TT
++CLASS="REPLACEABLE"
++><I
++>number-of-samples</I
++></TT
++> | toolame -b 128 -s 48 /dev/stdin output.m2a</PRE
++></DIV
++></DIV
++></DIV
++><DIV
++CLASS="NAVFOOTER"
++><HR
++ALIGN="LEFT"
++WIDTH="100%"><TABLE
++SUMMARY="Footer navigation table"
++WIDTH="100%"
++BORDER="0"
++CELLPADDING="0"
++CELLSPACING="0"
++><TR
++><TD
++WIDTH="33%"
++ALIGN="left"
++VALIGN="top"
++><A
++HREF="index.html"
++ACCESSKEY="P"
++>Prev</A
++></TD
++><TD
++WIDTH="34%"
++ALIGN="center"
++VALIGN="top"
++><A
++HREF="index.html"
++ACCESSKEY="H"
++>Home</A
++></TD
++><TD
++WIDTH="33%"
++ALIGN="right"
++VALIGN="top"
++><A
++HREF="ex-title.html"
++ACCESSKEY="N"
++>Next</A
++></TD
++></TR
++><TR
++><TD
++WIDTH="33%"
++ALIGN="left"
++VALIGN="top"
++>DVDAuthor</TD
++><TD
++WIDTH="34%"
++ALIGN="center"
++VALIGN="top"
++>&nbsp;</TD
++><TD
++WIDTH="33%"
++ALIGN="right"
++VALIGN="top"
++>Creating a title</TD
++></TR
++></TABLE
++></DIV
++></BODY
++></HTML
++>
+\ No newline at end of file
+Index: dvdauthor-0.6.14/html/index.html
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ dvdauthor-0.6.14/html/index.html	2010-01-04 14:32:00.000000000 +0100
+@@ -0,0 +1,250 @@
++<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
++<HTML
++><HEAD
++><TITLE
++>DVDAuthor</TITLE
++><META
++NAME="GENERATOR"
++CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
++REL="NEXT"
++TITLE="Examples"
++HREF="examples.html"></HEAD
++><BODY
++CLASS="BOOK"
++BGCOLOR="#FFFFFF"
++TEXT="#000000"
++LINK="#0000FF"
++VLINK="#840084"
++ALINK="#0000FF"
++><DIV
++CLASS="BOOK"
++><A
++NAME="INDEX"
++></A
++><DIV
++CLASS="TITLEPAGE"
++><H1
++CLASS="TITLE"
++><A
++NAME="INDEX"
++>DVDAuthor</A
++></H1
++><HR></DIV
++><DIV
++CLASS="TOC"
++><DL
++><DT
++><B
++>Table of Contents</B
++></DT
++><DT
++>1. <A
++HREF="examples.html"
++>Examples</A
++></DT
++><DD
++><DL
++><DT
++>1.1. <A
++HREF="examples.html#EX-TOOLS"
++>Running the tools</A
++></DT
++><DD
++><DL
++><DT
++>1.1.1. <A
++HREF="examples.html#AEN7"
++>Creating the DVD filesystem with dvdauthor</A
++></DT
++><DT
++>1.1.2. <A
++HREF="examples.html#AEN14"
++>Adding subtitles with spumux</A
++></DT
++><DT
++>1.1.3. <A
++HREF="examples.html#AEN19"
++>Creating a movie source from video and audio with mplex</A
++></DT
++><DT
++>1.1.4. <A
++HREF="examples.html#AEN24"
++>Creating video from bitmap images with mpeg2enc</A
++></DT
++><DT
++>1.1.5. <A
++HREF="examples.html#AEN30"
++>Creating a blank audio track with toolame</A
++></DT
++></DL
++></DD
++><DT
++>1.2. <A
++HREF="ex-title.html"
++>Creating a title</A
++></DT
++><DD
++><DL
++><DT
++>1.2.1. <A
++HREF="ex-title.html#AEN37"
++>One chapter, one source</A
++></DT
++><DT
++>1.2.2. <A
++HREF="ex-title.html#AEN41"
++>Two chapters, two sources</A
++></DT
++><DT
++>1.2.3. <A
++HREF="ex-title.html#AEN45"
++>One chapter, two sources</A
++></DT
++><DT
++>1.2.4. <A
++HREF="ex-title.html#AEN56"
++>Two chapters, one source</A
++></DT
++><DT
++>1.2.5. <A
++HREF="ex-title.html#AEN60"
++>Looping</A
++></DT
++><DT
++>1.2.6. <A
++HREF="ex-title.html#AEN65"
++>Pausing</A
++></DT
++></DL
++></DD
++></DL
++></DD
++><DT
++>A. <A
++HREF="languages.html"
++>Language Codes</A
++></DT
++><DT
++>I. <A
++HREF="manpages.html"
++>DVDAuthor Man Pages</A
++></DT
++><DD
++><DL
++><DT
++><A
++HREF="dvdauthor.html"
++>dvdauthor</A
++>&nbsp;--&nbsp;assembles multiple mpeg program streams into a suitable DVD filesystem</DT
++><DT
++><A
++HREF="r2253.html"
++>dvddirdel</A
++>&nbsp;--&nbsp;	Deletes a previously authored DVD directory structure in DIR
++	</DT
++><DT
++><A
++HREF="r2287.html"
++>dvdunauthor</A
++>&nbsp;--&nbsp;	Removes DVD-Video file structure
++	</DT
++><DT
++><A
++HREF="r2319.html"
++>mpeg2desc</A
++>&nbsp;--&nbsp;	multiplex audio/video streams
++	</DT
++><DT
++><A
++HREF="spumux.html"
++>spumux</A
++>&nbsp;--&nbsp;generates and multiplexes subtitles into an existing mpeg2 program stream</DT
++><DT
++><A
++HREF="spuunmux.html"
++>spuunmux</A
++>&nbsp;--&nbsp;	demultiplexes subtitles from an existing mpeg2 program stream
++	</DT
++></DL
++></DD
++></DL
++></DIV
++><DIV
++CLASS="LOT"
++><DL
++CLASS="LOT"
++><DT
++><B
++>List of Tables</B
++></DT
++><DT
++>A-1. <A
++HREF="languages.html#AEN80"
++>Sorted By Language Name</A
++></DT
++><DT
++>A-2. <A
++HREF="languages.html#AEN633"
++>Sorted By Language Code</A
++></DT
++><DT
++>A-3. <A
++HREF="languages.html#AEN1186"
++>Sorted By Language Group</A
++></DT
++></DL
++></DIV
++></DIV
++><DIV
++CLASS="NAVFOOTER"
++><HR
++ALIGN="LEFT"
++WIDTH="100%"><TABLE
++SUMMARY="Footer navigation table"
++WIDTH="100%"
++BORDER="0"
++CELLPADDING="0"
++CELLSPACING="0"
++><TR
++><TD
++WIDTH="33%"
++ALIGN="left"
++VALIGN="top"
++>&nbsp;</TD
++><TD
++WIDTH="34%"
++ALIGN="center"
++VALIGN="top"
++>&nbsp;</TD
++><TD
++WIDTH="33%"
++ALIGN="right"
++VALIGN="top"
++><A
++HREF="examples.html"
++ACCESSKEY="N"
++>Next</A
++></TD
++></TR
++><TR
++><TD
++WIDTH="33%"
++ALIGN="left"
++VALIGN="top"
++>&nbsp;</TD
++><TD
++WIDTH="34%"
++ALIGN="center"
++VALIGN="top"
++>&nbsp;</TD
++><TD
++WIDTH="33%"
++ALIGN="right"
++VALIGN="top"
++>Examples</TD
++></TR
++></TABLE
++></DIV
++></BODY
++></HTML
++>
+\ No newline at end of file
+Index: dvdauthor-0.6.14/html/languages.html
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ dvdauthor-0.6.14/html/languages.html	2010-01-04 14:32:00.000000000 +0100
+@@ -0,0 +1,3484 @@
++<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
++<HTML
++><HEAD
++><TITLE
++>Language Codes</TITLE
++><META
++NAME="GENERATOR"
++CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
++REL="HOME"
++TITLE="DVDAuthor"
++HREF="index.html"><LINK
++REL="PREVIOUS"
++TITLE="Creating a title"
++HREF="ex-title.html"><LINK
++REL="NEXT"
++TITLE="DVDAuthor Man Pages"
++HREF="manpages.html"></HEAD
++><BODY
++CLASS="APPENDIX"
++BGCOLOR="#FFFFFF"
++TEXT="#000000"
++LINK="#0000FF"
++VLINK="#840084"
++ALINK="#0000FF"
++><DIV
++CLASS="NAVHEADER"
++><TABLE
++SUMMARY="Header navigation table"
++WIDTH="100%"
++BORDER="0"
++CELLPADDING="0"
++CELLSPACING="0"
++><TR
++><TH
++COLSPAN="3"
++ALIGN="center"
++>DVDAuthor</TH
++></TR
++><TR
++><TD
++WIDTH="10%"
++ALIGN="left"
++VALIGN="bottom"
++><A
++HREF="ex-title.html"
++ACCESSKEY="P"
++>Prev</A
++></TD
++><TD
++WIDTH="80%"
++ALIGN="center"
++VALIGN="bottom"
++></TD
++><TD
++WIDTH="10%"
++ALIGN="right"
++VALIGN="bottom"
++><A
++HREF="manpages.html"
++ACCESSKEY="N"
++>Next</A
++></TD
++></TR
++></TABLE
++><HR
++ALIGN="LEFT"
++WIDTH="100%"></DIV
++><DIV
++CLASS="APPENDIX"
++><H1
++><A
++NAME="LANGUAGES"
++></A
++>Appendix A. Language Codes</H1
++><P
++>The following are the ISO 639 langauges codes, adapted from
++<SAMP
++CLASS="COMPUTEROUTPUT"
++>http://sunsite.berkeley.edu/amher/iso_639.html</SAMP
++>.</P
++><DIV
++CLASS="TABLE"
++><A
++NAME="AEN80"
++></A
++><P
++><B
++>Table A-1. Sorted By Language Name</B
++></P
++><TABLE
++BORDER="1"
++CLASS="CALSTABLE"
++><COL><COL><COL><THEAD
++><TR
++><TH
++>Langauge Name</TH
++><TH
++>Code</TH
++><TH
++>Language Family</TH
++></TR
++></THEAD
++><TBODY
++><TR
++><TD
++>ABKHAZIAN</TD
++><TD
++>AB</TD
++><TD
++>IBERO-CAUCASIAN</TD
++></TR
++><TR
++><TD
++>AFAN (OROMO)</TD
++><TD
++>OM</TD
++><TD
++>HAMITIC</TD
++></TR
++><TR
++><TD
++>AFAR</TD
++><TD
++>AA</TD
++><TD
++>HAMITIC</TD
++></TR
++><TR
++><TD
++>AFRIKAANS</TD
++><TD
++>AF</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>ALBANIAN</TD
++><TD
++>SQ</TD
++><TD
++>INDO-EUROPEAN (OTHER)</TD
++></TR
++><TR
++><TD
++>AMHARIC</TD
++><TD
++>AM</TD
++><TD
++>SEMITIC</TD
++></TR
++><TR
++><TD
++>ARABIC</TD
++><TD
++>AR</TD
++><TD
++>SEMITIC</TD
++></TR
++><TR
++><TD
++>ARMENIAN</TD
++><TD
++>HY</TD
++><TD
++>INDO-EUROPEAN (OTHER)</TD
++></TR
++><TR
++><TD
++>ASSAMESE</TD
++><TD
++>AS</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>AYMARA</TD
++><TD
++>AY</TD
++><TD
++>AMERINDIAN</TD
++></TR
++><TR
++><TD
++>AZERBAIJANI</TD
++><TD
++>AZ</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>BASHKIR</TD
++><TD
++>BA</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>BASQUE</TD
++><TD
++>EU</TD
++><TD
++>BASQUE</TD
++></TR
++><TR
++><TD
++>BENGALI;BANGLA</TD
++><TD
++>BN</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>BHUTANI</TD
++><TD
++>DZ</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>BIHARI</TD
++><TD
++>BH</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>BISLAMA</TD
++><TD
++>BI</TD
++><TD
++>[not given]</TD
++></TR
++><TR
++><TD
++>BRETON</TD
++><TD
++>BR</TD
++><TD
++>CELTIC</TD
++></TR
++><TR
++><TD
++>BULGARIAN</TD
++><TD
++>BG</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>BURMESE</TD
++><TD
++>MY</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>BYELORUSSIAN</TD
++><TD
++>BE</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>CAMBODIAN</TD
++><TD
++>KM</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>CATALAN</TD
++><TD
++>CA</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>CHINESE</TD
++><TD
++>ZH</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>CORSICAN</TD
++><TD
++>CO</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>CROATIAN</TD
++><TD
++>HR</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>CZECH</TD
++><TD
++>CS</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>DANISH</TD
++><TD
++>DA</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>DUTCH</TD
++><TD
++>NL</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>ENGLISH</TD
++><TD
++>EN</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>ESPERANTO</TD
++><TD
++>EO</TD
++><TD
++>INTERNATIONAL AUX.</TD
++></TR
++><TR
++><TD
++>ESTONIAN</TD
++><TD
++>ET</TD
++><TD
++>FINNO-UGRIC</TD
++></TR
++><TR
++><TD
++>FAROESE</TD
++><TD
++>FO</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>FIJI</TD
++><TD
++>FJ</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>FINNISH</TD
++><TD
++>FI</TD
++><TD
++>FINNO-UGRIC</TD
++></TR
++><TR
++><TD
++>FRENCH</TD
++><TD
++>FR</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>FRISIAN</TD
++><TD
++>FY</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>GALICIAN</TD
++><TD
++>GL</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>GEORGIAN</TD
++><TD
++>KA</TD
++><TD
++>IBERO-CAUCASIAN</TD
++></TR
++><TR
++><TD
++>GERMAN</TD
++><TD
++>DE</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>GREEK</TD
++><TD
++>EL</TD
++><TD
++>LATIN/GREEK</TD
++></TR
++><TR
++><TD
++>GREENLANDIC</TD
++><TD
++>KL</TD
++><TD
++>ESKIMO</TD
++></TR
++><TR
++><TD
++>GUARANI</TD
++><TD
++>GN</TD
++><TD
++>AMERINDIAN</TD
++></TR
++><TR
++><TD
++>GUJARATI</TD
++><TD
++>GU</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>HAUSA</TD
++><TD
++>HA</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>HEBREW</TD
++><TD
++>IW</TD
++><TD
++>SEMITIC</TD
++></TR
++><TR
++><TD
++>HINDI</TD
++><TD
++>HI</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>HUNGARIAN</TD
++><TD
++>HU</TD
++><TD
++>FINNO-UGRIC</TD
++></TR
++><TR
++><TD
++>ICELANDIC</TD
++><TD
++>IS</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>INDONESIAN</TD
++><TD
++>IN</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>INTERLINGUA</TD
++><TD
++>IA</TD
++><TD
++>INTERNATIONAL AUX.</TD
++></TR
++><TR
++><TD
++>INTERLINGUE</TD
++><TD
++>IE</TD
++><TD
++>INTERNATIONAL AUX.</TD
++></TR
++><TR
++><TD
++>INUPIAK</TD
++><TD
++>IK</TD
++><TD
++>ESKIMO</TD
++></TR
++><TR
++><TD
++>IRISH</TD
++><TD
++>GA</TD
++><TD
++>CELTIC</TD
++></TR
++><TR
++><TD
++>ITALIAN</TD
++><TD
++>IT</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>JAPANESE</TD
++><TD
++>JA</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>JAVANESE</TD
++><TD
++>JV</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>KANNADA</TD
++><TD
++>KN</TD
++><TD
++>DRAVIDIAN</TD
++></TR
++><TR
++><TD
++>KASHMIRI</TD
++><TD
++>KS</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>KAZAKH</TD
++><TD
++>KK</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>KINYARWANDA</TD
++><TD
++>RW</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>KIRGHIZ</TD
++><TD
++>KY</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>KURUNDI</TD
++><TD
++>RN</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>KOREAN</TD
++><TD
++>KO</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>KURDISH</TD
++><TD
++>KU</TD
++><TD
++>IRANIAN</TD
++></TR
++><TR
++><TD
++>LAOTHIAN</TD
++><TD
++>LO</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>LATIN</TD
++><TD
++>LA</TD
++><TD
++>LATIN/GREEK</TD
++></TR
++><TR
++><TD
++>LATVIAN;LETTISH</TD
++><TD
++>LV</TD
++><TD
++>BALTIC</TD
++></TR
++><TR
++><TD
++>LINGALA</TD
++><TD
++>LN</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>LITHUANIAN</TD
++><TD
++>LT</TD
++><TD
++>BALTIC</TD
++></TR
++><TR
++><TD
++>MACEDONIAN</TD
++><TD
++>MK</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>MALAGASY</TD
++><TD
++>MG</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>MALAY</TD
++><TD
++>MS</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>MALAYALAM</TD
++><TD
++>ML</TD
++><TD
++>DRAVIDIAN</TD
++></TR
++><TR
++><TD
++>MALTESE</TD
++><TD
++>MT</TD
++><TD
++>SEMITIC</TD
++></TR
++><TR
++><TD
++>MAORI</TD
++><TD
++>MI</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>MARATHI</TD
++><TD
++>MR</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>MOLDAVIAN</TD
++><TD
++>MO</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>MONGOLIAN</TD
++><TD
++>MN</TD
++><TD
++>[not given]</TD
++></TR
++><TR
++><TD
++>NAURU</TD
++><TD
++>NA</TD
++><TD
++>[not given]</TD
++></TR
++><TR
++><TD
++>NEPALI</TD
++><TD
++>NE</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>NORWEGIAN</TD
++><TD
++>NO</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>OCCITAN</TD
++><TD
++>OC</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>ORIYA</TD
++><TD
++>OR</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>PASHTO;PUSHTO</TD
++><TD
++>PS</TD
++><TD
++>IRANIAN</TD
++></TR
++><TR
++><TD
++>PERSIAN (farsi)</TD
++><TD
++>FA</TD
++><TD
++>IRANIAN</TD
++></TR
++><TR
++><TD
++>POLISH</TD
++><TD
++>PL</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>PORTUGUESE</TD
++><TD
++>PT</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>PUNJABI</TD
++><TD
++>PA</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>QUECHUA</TD
++><TD
++>QU</TD
++><TD
++>AMERINDIAN</TD
++></TR
++><TR
++><TD
++>RHAETO-ROMANCE</TD
++><TD
++>RM</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>ROMANIAN</TD
++><TD
++>RO</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>RUSSIAN</TD
++><TD
++>RU</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>SAMOAN</TD
++><TD
++>SM</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>SANGHO</TD
++><TD
++>SG</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>SANSKRIT</TD
++><TD
++>SA</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>SCOTS</TD
++><TD
++>GAELIC</TD
++><TD
++>GD     CELTIC</TD
++></TR
++><TR
++><TD
++>SERBIAN</TD
++><TD
++>SR</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>SERBO-CROATIAN</TD
++><TD
++>SH</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>SESOTHO</TD
++><TD
++>ST</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>SETSWANA</TD
++><TD
++>TN</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>SHONA</TD
++><TD
++>SN</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>SINDHI</TD
++><TD
++>SD</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>SINGHALESE</TD
++><TD
++>SI</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>SISWATI</TD
++><TD
++>SS</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>SLOVAK</TD
++><TD
++>SK</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>SLOVENIAN</TD
++><TD
++>SL</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>SOMALI</TD
++><TD
++>SO</TD
++><TD
++>HAMITIC</TD
++></TR
++><TR
++><TD
++>SPANISH</TD
++><TD
++>ES</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>SUNDANESE</TD
++><TD
++>SU</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>SWAHILI</TD
++><TD
++>SW</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>SWEDISH</TD
++><TD
++>SV</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>TAGALOG</TD
++><TD
++>TL</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>TAJIK</TD
++><TD
++>TG</TD
++><TD
++>IRANIAN</TD
++></TR
++><TR
++><TD
++>TAMIL</TD
++><TD
++>TA</TD
++><TD
++>DRAVIDIAN</TD
++></TR
++><TR
++><TD
++>TATAR</TD
++><TD
++>TT</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>TELUGU</TD
++><TD
++>TE</TD
++><TD
++>DRAVIDIAN</TD
++></TR
++><TR
++><TD
++>THAI</TD
++><TD
++>TH</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>TIBETAN</TD
++><TD
++>BO</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>TIGRINYA</TD
++><TD
++>TI</TD
++><TD
++>SEMITIC</TD
++></TR
++><TR
++><TD
++>TONGA</TD
++><TD
++>TO</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>TSONGA</TD
++><TD
++>TS</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>TURKISH</TD
++><TD
++>TR</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>TURKMEN</TD
++><TD
++>TK</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>TWI</TD
++><TD
++>TW</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>UKRAINIAN</TD
++><TD
++>UK</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>URDU</TD
++><TD
++>UR</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>UZBEK</TD
++><TD
++>UZ</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>VIETNAMESE</TD
++><TD
++>VI</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>VOLAPUK</TD
++><TD
++>VO</TD
++><TD
++>INTERNATIONAL AUX.</TD
++></TR
++><TR
++><TD
++>WELSH</TD
++><TD
++>CY</TD
++><TD
++>CELTIC</TD
++></TR
++><TR
++><TD
++>WOLOF</TD
++><TD
++>WO</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>XHOSA</TD
++><TD
++>XH</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>YIDDISH</TD
++><TD
++>JI</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>YORUBA</TD
++><TD
++>YO</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>ZULU</TD
++><TD
++>ZU</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++></TBODY
++></TABLE
++></DIV
++><DIV
++CLASS="TABLE"
++><A
++NAME="AEN633"
++></A
++><P
++><B
++>Table A-2. Sorted By Language Code</B
++></P
++><TABLE
++BORDER="1"
++CLASS="CALSTABLE"
++><COL><COL><COL><THEAD
++><TR
++><TH
++>Langauge Name</TH
++><TH
++>Code</TH
++><TH
++>Language Family</TH
++></TR
++></THEAD
++><TBODY
++><TR
++><TD
++>AFAR</TD
++><TD
++>AA</TD
++><TD
++>HAMITIC</TD
++></TR
++><TR
++><TD
++>ABKHAZIAN</TD
++><TD
++>AB</TD
++><TD
++>IBERO-CAUCASIAN</TD
++></TR
++><TR
++><TD
++>AFRIKAANS</TD
++><TD
++>AF</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>AMHARIC</TD
++><TD
++>AM</TD
++><TD
++>SEMITIC</TD
++></TR
++><TR
++><TD
++>ARABIC</TD
++><TD
++>AR</TD
++><TD
++>SEMITIC</TD
++></TR
++><TR
++><TD
++>ASSAMESE</TD
++><TD
++>AS</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>AYMARA</TD
++><TD
++>AY</TD
++><TD
++>AMERINDIAN</TD
++></TR
++><TR
++><TD
++>AZERBAIJANI</TD
++><TD
++>AZ</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>BASHKIR</TD
++><TD
++>BA</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>BYELORUSSIAN</TD
++><TD
++>BE</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>BULGARIAN</TD
++><TD
++>BG</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>BIHARI</TD
++><TD
++>BH</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>BISLAMA</TD
++><TD
++>BI</TD
++><TD
++>[not given]</TD
++></TR
++><TR
++><TD
++>BENGALI;BANGLA</TD
++><TD
++>BN</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>TIBETAN</TD
++><TD
++>BO</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>BRETON</TD
++><TD
++>BR</TD
++><TD
++>CELTIC</TD
++></TR
++><TR
++><TD
++>CATALAN</TD
++><TD
++>CA</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>CORSICAN</TD
++><TD
++>CO</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>CZECH</TD
++><TD
++>CS</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>WELSH</TD
++><TD
++>CY</TD
++><TD
++>CELTIC</TD
++></TR
++><TR
++><TD
++>DANISH</TD
++><TD
++>DA</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>GERMAN</TD
++><TD
++>DE</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>BHUTANI</TD
++><TD
++>DZ</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>GREEK</TD
++><TD
++>EL</TD
++><TD
++>LATIN/GREEK</TD
++></TR
++><TR
++><TD
++>ENGLISH</TD
++><TD
++>EN</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>ESPERANTO</TD
++><TD
++>EO</TD
++><TD
++>INTERNATIONAL AUX.</TD
++></TR
++><TR
++><TD
++>SPANISH</TD
++><TD
++>ES</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>ESTONIAN</TD
++><TD
++>ET</TD
++><TD
++>FINNO-UGRIC</TD
++></TR
++><TR
++><TD
++>BASQUE</TD
++><TD
++>EU</TD
++><TD
++>BASQUE</TD
++></TR
++><TR
++><TD
++>PERSIAN (farsi)</TD
++><TD
++>FA</TD
++><TD
++>IRANIAN</TD
++></TR
++><TR
++><TD
++>FINNISH</TD
++><TD
++>FI</TD
++><TD
++>FINNO-UGRIC</TD
++></TR
++><TR
++><TD
++>FIJI</TD
++><TD
++>FJ</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>FAROESE</TD
++><TD
++>FO</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>FRENCH</TD
++><TD
++>FR</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>FRISIAN</TD
++><TD
++>FY</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>IRISH</TD
++><TD
++>GA</TD
++><TD
++>CELTIC</TD
++></TR
++><TR
++><TD
++>SCOTS GAELIC</TD
++><TD
++>GD</TD
++><TD
++>CELTIC</TD
++></TR
++><TR
++><TD
++>GALICIAN</TD
++><TD
++>GL</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>GUARANI</TD
++><TD
++>GN</TD
++><TD
++>AMERINDIAN</TD
++></TR
++><TR
++><TD
++>GUJARATI</TD
++><TD
++>GU</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>HAUSA</TD
++><TD
++>HA</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>HINDI</TD
++><TD
++>HI</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>CROATIAN</TD
++><TD
++>HR</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>HUNGARIAN</TD
++><TD
++>HU</TD
++><TD
++>FINNO-UGRIC</TD
++></TR
++><TR
++><TD
++>ARMENIAN</TD
++><TD
++>HY</TD
++><TD
++>INDO-EUROPEAN (OTHER)</TD
++></TR
++><TR
++><TD
++>INTERLINGUA</TD
++><TD
++>IA</TD
++><TD
++>INTERNATIONAL AUX.</TD
++></TR
++><TR
++><TD
++>INTERLINGUE</TD
++><TD
++>IE</TD
++><TD
++>INTERNATIONAL AUX.</TD
++></TR
++><TR
++><TD
++>INUPIAK</TD
++><TD
++>IK</TD
++><TD
++>ESKIMO</TD
++></TR
++><TR
++><TD
++>INDONESIAN</TD
++><TD
++>IN</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>ICELANDIC</TD
++><TD
++>IS</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>ITALIAN</TD
++><TD
++>IT</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>HEBREW</TD
++><TD
++>IW</TD
++><TD
++>SEMITIC</TD
++></TR
++><TR
++><TD
++>JAPANESE</TD
++><TD
++>JA</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>YIDDISH</TD
++><TD
++>JI</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>JAVANESE</TD
++><TD
++>JV</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>GEORGIAN</TD
++><TD
++>KA</TD
++><TD
++>IBERO-CAUCASIAN</TD
++></TR
++><TR
++><TD
++>KAZAKH</TD
++><TD
++>KK</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>GREENLANDIC</TD
++><TD
++>KL</TD
++><TD
++>ESKIMO</TD
++></TR
++><TR
++><TD
++>CAMBODIAN</TD
++><TD
++>KM</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>KANNADA</TD
++><TD
++>KN</TD
++><TD
++>DRAVIDIAN</TD
++></TR
++><TR
++><TD
++>KOREAN</TD
++><TD
++>KO</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>KASHMIRI</TD
++><TD
++>KS</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>KURDISH</TD
++><TD
++>KU</TD
++><TD
++>IRANIAN</TD
++></TR
++><TR
++><TD
++>KIRGHIZ</TD
++><TD
++>KY</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>LATIN</TD
++><TD
++>LA</TD
++><TD
++>LATIN/GREEK</TD
++></TR
++><TR
++><TD
++>LINGALA</TD
++><TD
++>LN</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>LAOTHIAN</TD
++><TD
++>LO</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>LITHUANIAN</TD
++><TD
++>LT</TD
++><TD
++>BALTIC</TD
++></TR
++><TR
++><TD
++>LATVIAN;LETTISH</TD
++><TD
++>LV</TD
++><TD
++>BALTIC</TD
++></TR
++><TR
++><TD
++>MALAGASY</TD
++><TD
++>MG</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>MAORI</TD
++><TD
++>MI</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>MACEDONIAN</TD
++><TD
++>MK</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>MALAYALAM</TD
++><TD
++>ML</TD
++><TD
++>DRAVIDIAN</TD
++></TR
++><TR
++><TD
++>MONGOLIAN</TD
++><TD
++>MN</TD
++><TD
++>[not given]</TD
++></TR
++><TR
++><TD
++>MOLDAVIAN</TD
++><TD
++>MO</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>MARATHI</TD
++><TD
++>MR</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>MALAY</TD
++><TD
++>MS</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>MALTESE</TD
++><TD
++>MT</TD
++><TD
++>SEMITIC</TD
++></TR
++><TR
++><TD
++>BURMESE</TD
++><TD
++>MY</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>NAURU</TD
++><TD
++>NA</TD
++><TD
++>[not given]</TD
++></TR
++><TR
++><TD
++>NEPALI</TD
++><TD
++>NE</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>DUTCH</TD
++><TD
++>NL</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>NORWEGIAN</TD
++><TD
++>NO</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>OCCITAN</TD
++><TD
++>OC</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>AFAN (OROMO)</TD
++><TD
++>OM</TD
++><TD
++>HAMITIC</TD
++></TR
++><TR
++><TD
++>ORIYA</TD
++><TD
++>OR</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>PUNJABI</TD
++><TD
++>PA</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>POLISH</TD
++><TD
++>PL</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>PASHTO;PUSHTO</TD
++><TD
++>PS</TD
++><TD
++>IRANIAN</TD
++></TR
++><TR
++><TD
++>PORTUGUESE</TD
++><TD
++>PT</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>QUECHUA</TD
++><TD
++>QU</TD
++><TD
++>AMERINDIAN</TD
++></TR
++><TR
++><TD
++>RHAETO-ROMANCE</TD
++><TD
++>RM</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>KURUNDI</TD
++><TD
++>RN</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>ROMANIAN</TD
++><TD
++>RO</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>RUSSIAN</TD
++><TD
++>RU</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>KINYARWANDA</TD
++><TD
++>RW</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>SANSKRIT</TD
++><TD
++>SA</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>SINDHI</TD
++><TD
++>SD</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>SANGHO</TD
++><TD
++>SG</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>SERBO-CROATIAN</TD
++><TD
++>SH</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>SINGHALESE</TD
++><TD
++>SI</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>SLOVAK</TD
++><TD
++>SK</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>SLOVENIAN</TD
++><TD
++>SL</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>SAMOAN</TD
++><TD
++>SM</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>SHONA</TD
++><TD
++>SN</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>SOMALI</TD
++><TD
++>SO</TD
++><TD
++>HAMITIC</TD
++></TR
++><TR
++><TD
++>ALBANIAN</TD
++><TD
++>SQ</TD
++><TD
++>INDO-EUROPEAN (OTHER)</TD
++></TR
++><TR
++><TD
++>SERBIAN</TD
++><TD
++>SR</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>SISWATI</TD
++><TD
++>SS</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>SESOTHO</TD
++><TD
++>ST</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>SUNDANESE</TD
++><TD
++>SU</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>SWEDISH</TD
++><TD
++>SV</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>SWAHILI</TD
++><TD
++>SW</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>TAMIL</TD
++><TD
++>TA</TD
++><TD
++>DRAVIDIAN</TD
++></TR
++><TR
++><TD
++>TELUGU</TD
++><TD
++>TE</TD
++><TD
++>DRAVIDIAN</TD
++></TR
++><TR
++><TD
++>TAJIK</TD
++><TD
++>TG</TD
++><TD
++>IRANIAN</TD
++></TR
++><TR
++><TD
++>THAI</TD
++><TD
++>TH</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>TIGRINYA</TD
++><TD
++>TI</TD
++><TD
++>SEMITIC</TD
++></TR
++><TR
++><TD
++>TURKMEN</TD
++><TD
++>TK</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>TAGALOG</TD
++><TD
++>TL</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>SETSWANA</TD
++><TD
++>TN</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>TONGA</TD
++><TD
++>TO</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>TURKISH</TD
++><TD
++>TR</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>TSONGA</TD
++><TD
++>TS</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>TATAR</TD
++><TD
++>TT</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>TWI</TD
++><TD
++>TW</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>UKRAINIAN</TD
++><TD
++>UK</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>URDU</TD
++><TD
++>UR</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>UZBEK</TD
++><TD
++>UZ</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>VIETNAMESE</TD
++><TD
++>VI</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>VOLAPUK</TD
++><TD
++>VO</TD
++><TD
++>INTERNATIONAL AUX.</TD
++></TR
++><TR
++><TD
++>WOLOF</TD
++><TD
++>WO</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>XHOSA</TD
++><TD
++>XH</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>YORUBA</TD
++><TD
++>YO</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>CHINESE</TD
++><TD
++>ZH</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>ZULU</TD
++><TD
++>ZU</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++></TBODY
++></TABLE
++></DIV
++><DIV
++CLASS="TABLE"
++><A
++NAME="AEN1186"
++></A
++><P
++><B
++>Table A-3. Sorted By Language Group</B
++></P
++><TABLE
++BORDER="1"
++CLASS="CALSTABLE"
++><COL><COL><COL><THEAD
++><TR
++><TH
++>Langauge Name</TH
++><TH
++>Code</TH
++><TH
++>Language Family</TH
++></TR
++></THEAD
++><TBODY
++><TR
++><TD
++>AYMARA</TD
++><TD
++>AY</TD
++><TD
++>AMERINDIAN</TD
++></TR
++><TR
++><TD
++>GUARANI</TD
++><TD
++>GN</TD
++><TD
++>AMERINDIAN</TD
++></TR
++><TR
++><TD
++>QUECHUA</TD
++><TD
++>QU</TD
++><TD
++>AMERINDIAN</TD
++></TR
++><TR
++><TD
++>BHUTANI</TD
++><TD
++>DZ</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>BURMESE</TD
++><TD
++>MY</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>CAMBODIAN</TD
++><TD
++>KM</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>CHINESE</TD
++><TD
++>ZH</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>JAPANESE</TD
++><TD
++>JA</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>KOREAN</TD
++><TD
++>KO</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>LAOTHIAN</TD
++><TD
++>LO</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>THAI</TD
++><TD
++>TH</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>TIBETAN</TD
++><TD
++>BO</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>VIETNAMESE</TD
++><TD
++>VI</TD
++><TD
++>ASIAN</TD
++></TR
++><TR
++><TD
++>LATVIAN;LETTISH</TD
++><TD
++>LV</TD
++><TD
++>BALTIC</TD
++></TR
++><TR
++><TD
++>LITHUANIAN</TD
++><TD
++>LT</TD
++><TD
++>BALTIC</TD
++></TR
++><TR
++><TD
++>BASQUE</TD
++><TD
++>EU</TD
++><TD
++>BASQUE</TD
++></TR
++><TR
++><TD
++>BRETON</TD
++><TD
++>BR</TD
++><TD
++>CELTIC</TD
++></TR
++><TR
++><TD
++>IRISH</TD
++><TD
++>GA</TD
++><TD
++>CELTIC</TD
++></TR
++><TR
++><TD
++>SCOTS GAELIC</TD
++><TD
++>GD</TD
++><TD
++>CELTIC</TD
++></TR
++><TR
++><TD
++>WELSH</TD
++><TD
++>CY</TD
++><TD
++>CELTIC</TD
++></TR
++><TR
++><TD
++>KANNADA</TD
++><TD
++>KN</TD
++><TD
++>DRAVIDIAN</TD
++></TR
++><TR
++><TD
++>MALAYALAM</TD
++><TD
++>ML</TD
++><TD
++>DRAVIDIAN</TD
++></TR
++><TR
++><TD
++>TAMIL</TD
++><TD
++>TA</TD
++><TD
++>DRAVIDIAN</TD
++></TR
++><TR
++><TD
++>TELUGU</TD
++><TD
++>TE</TD
++><TD
++>DRAVIDIAN</TD
++></TR
++><TR
++><TD
++>GREENLANDIC</TD
++><TD
++>KL</TD
++><TD
++>ESKIMO</TD
++></TR
++><TR
++><TD
++>INUPIAK</TD
++><TD
++>IK</TD
++><TD
++>ESKIMO</TD
++></TR
++><TR
++><TD
++>ESTONIAN</TD
++><TD
++>ET</TD
++><TD
++>FINNO-UGRIC</TD
++></TR
++><TR
++><TD
++>FINNISH</TD
++><TD
++>FI</TD
++><TD
++>FINNO-UGRIC</TD
++></TR
++><TR
++><TD
++>HUNGARIAN</TD
++><TD
++>HU</TD
++><TD
++>FINNO-UGRIC</TD
++></TR
++><TR
++><TD
++>AFRIKAANS</TD
++><TD
++>AF</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>DANISH</TD
++><TD
++>DA</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>DUTCH</TD
++><TD
++>NL</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>ENGLISH</TD
++><TD
++>EN</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>FAROESE</TD
++><TD
++>FO</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>FRISIAN</TD
++><TD
++>FY</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>GERMAN</TD
++><TD
++>DE</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>ICELANDIC</TD
++><TD
++>IS</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>NORWEGIAN</TD
++><TD
++>NO</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>SWEDISH</TD
++><TD
++>SV</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>YIDDISH</TD
++><TD
++>JI</TD
++><TD
++>GERMANIC</TD
++></TR
++><TR
++><TD
++>AFAN (OROMO)</TD
++><TD
++>OM</TD
++><TD
++>HAMITIC</TD
++></TR
++><TR
++><TD
++>AFAR</TD
++><TD
++>AA</TD
++><TD
++>HAMITIC</TD
++></TR
++><TR
++><TD
++>SOMALI</TD
++><TD
++>SO</TD
++><TD
++>HAMITIC</TD
++></TR
++><TR
++><TD
++>ABKHAZIAN</TD
++><TD
++>AB</TD
++><TD
++>IBERO-CAUCASIAN</TD
++></TR
++><TR
++><TD
++>GEORGIAN</TD
++><TD
++>KA</TD
++><TD
++>IBERO-CAUCASIAN</TD
++></TR
++><TR
++><TD
++>ASSAMESE</TD
++><TD
++>AS</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>BENGALI;BANGLA</TD
++><TD
++>BN</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>BIHARI</TD
++><TD
++>BH</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>GUJARATI</TD
++><TD
++>GU</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>HINDI</TD
++><TD
++>HI</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>KASHMIRI</TD
++><TD
++>KS</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>MARATHI</TD
++><TD
++>MR</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>NEPALI</TD
++><TD
++>NE</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>ORIYA</TD
++><TD
++>OR</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>PUNJABI</TD
++><TD
++>PA</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>SANSKRIT</TD
++><TD
++>SA</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>SINDHI</TD
++><TD
++>SD</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>SINGHALESE</TD
++><TD
++>SI</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>URDU</TD
++><TD
++>UR</TD
++><TD
++>INDIAN</TD
++></TR
++><TR
++><TD
++>ALBANIAN</TD
++><TD
++>SQ</TD
++><TD
++>INDO-EUROPEAN (OTHER)</TD
++></TR
++><TR
++><TD
++>ARMENIAN</TD
++><TD
++>HY</TD
++><TD
++>INDO-EUROPEAN (OTHER)</TD
++></TR
++><TR
++><TD
++>ESPERANTO</TD
++><TD
++>EO</TD
++><TD
++>INTERNATIONAL AUX.</TD
++></TR
++><TR
++><TD
++>INTERLINGUA</TD
++><TD
++>IA</TD
++><TD
++>INTERNATIONAL AUX.</TD
++></TR
++><TR
++><TD
++>INTERLINGUE</TD
++><TD
++>IE</TD
++><TD
++>INTERNATIONAL AUX.</TD
++></TR
++><TR
++><TD
++>VOLAPUK</TD
++><TD
++>VO</TD
++><TD
++>INTERNATIONAL AUX.</TD
++></TR
++><TR
++><TD
++>KURDISH</TD
++><TD
++>KU</TD
++><TD
++>IRANIAN</TD
++></TR
++><TR
++><TD
++>PASHTO;PUSHTO</TD
++><TD
++>PS</TD
++><TD
++>IRANIAN</TD
++></TR
++><TR
++><TD
++>PERSIAN (farsi)</TD
++><TD
++>FA</TD
++><TD
++>IRANIAN</TD
++></TR
++><TR
++><TD
++>TAJIK</TD
++><TD
++>TG</TD
++><TD
++>IRANIAN</TD
++></TR
++><TR
++><TD
++>GREEK</TD
++><TD
++>EL</TD
++><TD
++>LATIN/GREEK</TD
++></TR
++><TR
++><TD
++>LATIN</TD
++><TD
++>LA</TD
++><TD
++>LATIN/GREEK</TD
++></TR
++><TR
++><TD
++>HAUSA</TD
++><TD
++>HA</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>KINYARWANDA</TD
++><TD
++>RW</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>KURUNDI</TD
++><TD
++>RN</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>LINGALA</TD
++><TD
++>LN</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>SANGHO</TD
++><TD
++>SG</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>SESOTHO</TD
++><TD
++>ST</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>SETSWANA</TD
++><TD
++>TN</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>SHONA</TD
++><TD
++>SN</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>SISWATI</TD
++><TD
++>SS</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>SWAHILI</TD
++><TD
++>SW</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>TSONGA</TD
++><TD
++>TS</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>TWI</TD
++><TD
++>TW</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>WOLOF</TD
++><TD
++>WO</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>XHOSA</TD
++><TD
++>XH</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>YORUBA</TD
++><TD
++>YO</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>ZULU</TD
++><TD
++>ZU</TD
++><TD
++>NEGRO-AFRICAN</TD
++></TR
++><TR
++><TD
++>FIJI</TD
++><TD
++>FJ</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>INDONESIAN</TD
++><TD
++>IN</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>JAVANESE</TD
++><TD
++>JV</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>MALAGASY</TD
++><TD
++>MG</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>MALAY</TD
++><TD
++>MS</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>MAORI</TD
++><TD
++>MI</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>SAMOAN</TD
++><TD
++>SM</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>SUNDANESE</TD
++><TD
++>SU</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>TAGALOG</TD
++><TD
++>TL</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>TONGA</TD
++><TD
++>TO</TD
++><TD
++>OCEANIC/INDONESIAN</TD
++></TR
++><TR
++><TD
++>CATALAN</TD
++><TD
++>CA</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>CORSICAN</TD
++><TD
++>CO</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>FRENCH</TD
++><TD
++>FR</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>GALICIAN</TD
++><TD
++>GL</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>ITALIAN</TD
++><TD
++>IT</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>MOLDAVIAN</TD
++><TD
++>MO</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>OCCITAN</TD
++><TD
++>OC</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>PORTUGUESE</TD
++><TD
++>PT</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>RHAETO-ROMANCE</TD
++><TD
++>RM</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>ROMANIAN</TD
++><TD
++>RO</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>SPANISH</TD
++><TD
++>ES</TD
++><TD
++>ROMANCE</TD
++></TR
++><TR
++><TD
++>AMHARIC</TD
++><TD
++>AM</TD
++><TD
++>SEMITIC</TD
++></TR
++><TR
++><TD
++>ARABIC</TD
++><TD
++>AR</TD
++><TD
++>SEMITIC</TD
++></TR
++><TR
++><TD
++>HEBREW</TD
++><TD
++>IW</TD
++><TD
++>SEMITIC</TD
++></TR
++><TR
++><TD
++>MALTESE</TD
++><TD
++>MT</TD
++><TD
++>SEMITIC</TD
++></TR
++><TR
++><TD
++>TIGRINYA</TD
++><TD
++>TI</TD
++><TD
++>SEMITIC</TD
++></TR
++><TR
++><TD
++>BULGARIAN</TD
++><TD
++>BG</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>BYELORUSSIAN</TD
++><TD
++>BE</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>CROATIAN</TD
++><TD
++>HR</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>CZECH</TD
++><TD
++>CS</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>MACEDONIAN</TD
++><TD
++>MK</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>POLISH</TD
++><TD
++>PL</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>RUSSIAN</TD
++><TD
++>RU</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>SERBIAN</TD
++><TD
++>SR</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>SERBO-CROATIAN</TD
++><TD
++>SH</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>SLOVAK</TD
++><TD
++>SK</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>SLOVENIAN</TD
++><TD
++>SL</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>UKRAINIAN</TD
++><TD
++>UK</TD
++><TD
++>SLAVIC</TD
++></TR
++><TR
++><TD
++>AZERBAIJANI</TD
++><TD
++>AZ</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>BASHKIR</TD
++><TD
++>BA</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>KAZAKH</TD
++><TD
++>KK</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>KIRGHIZ</TD
++><TD
++>KY</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>TATAR</TD
++><TD
++>TT</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>TURKISH</TD
++><TD
++>TR</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>TURKMEN</TD
++><TD
++>TK</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>UZBEK</TD
++><TD
++>UZ</TD
++><TD
++>TURKIC/ALTAIC</TD
++></TR
++><TR
++><TD
++>BISLAMA</TD
++><TD
++>BI</TD
++><TD
++>[not given]</TD
++></TR
++><TR
++><TD
++>MONGOLIAN</TD
++><TD
++>MN</TD
++><TD
++>[not given]</TD
++></TR
++><TR
++><TD
++>NAURU</TD
++><TD
++>NA</TD
++><TD
++>[not given]</TD
++></TR
++></TBODY
++></TABLE
++></DIV
++></DIV
++><DIV
++CLASS="NAVFOOTER"
++><HR
++ALIGN="LEFT"
++WIDTH="100%"><TABLE
++SUMMARY="Footer navigation table"
++WIDTH="100%"
++BORDER="0"
++CELLPADDING="0"
++CELLSPACING="0"
++><TR
++><TD
++WIDTH="33%"
++ALIGN="left"
++VALIGN="top"
++><A
++HREF="ex-title.html"
++ACCESSKEY="P"
++>Prev</A
++></TD
++><TD
++WIDTH="34%"
++ALIGN="center"
++VALIGN="top"
++><A
++HREF="index.html"
++ACCESSKEY="H"
++>Home</A
++></TD
++><TD
++WIDTH="33%"
++ALIGN="right"
++VALIGN="top"
++><A
++HREF="manpages.html"
++ACCESSKEY="N"
++>Next</A
++></TD
++></TR
++><TR
++><TD
++WIDTH="33%"
++ALIGN="left"
++VALIGN="top"
++>Creating a title</TD
++><TD
++WIDTH="34%"
++ALIGN="center"
++VALIGN="top"
++>&nbsp;</TD
++><TD
++WIDTH="33%"
++ALIGN="right"
++VALIGN="top"
++>DVDAuthor Man Pages</TD
++></TR
++></TABLE
++></DIV
++></BODY
++></HTML
++>
+\ No newline at end of file
+Index: dvdauthor-0.6.14/html/manpages.html
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ dvdauthor-0.6.14/html/manpages.html	2010-01-04 14:32:00.000000000 +0100
+@@ -0,0 +1,183 @@
++<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
++<HTML
++><HEAD
++><TITLE
++>DVDAuthor Man Pages</TITLE
++><META
++NAME="GENERATOR"
++CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
++REL="HOME"
++TITLE="DVDAuthor"
++HREF="index.html"><LINK
++REL="PREVIOUS"
++TITLE="Language Codes"
++HREF="languages.html"><LINK
++REL="NEXT"
++TITLE="dvdauthor"
++HREF="dvdauthor.html"></HEAD
++><BODY
++CLASS="REFERENCE"
++BGCOLOR="#FFFFFF"
++TEXT="#000000"
++LINK="#0000FF"
++VLINK="#840084"
++ALINK="#0000FF"
++><DIV
++CLASS="NAVHEADER"
++><TABLE
++SUMMARY="Header navigation table"
++WIDTH="100%"
++BORDER="0"
++CELLPADDING="0"
++CELLSPACING="0"
++><TR
++><TH
++COLSPAN="3"
++ALIGN="center"
++>DVDAuthor</TH
++></TR
++><TR
++><TD
++WIDTH="10%"
++ALIGN="left"
++VALIGN="bottom"
++><A
++HREF="languages.html"
++ACCESSKEY="P"
++>Prev</A
++></TD
++><TD
++WIDTH="80%"
++ALIGN="center"
++VALIGN="bottom"
++></TD
++><TD
++WIDTH="10%"
++ALIGN="right"
++VALIGN="bottom"
++><A
++HREF="dvdauthor.html"
++ACCESSKEY="N"
++>Next</A
++></TD
++></TR
++></TABLE
++><HR
++ALIGN="LEFT"
++WIDTH="100%"></DIV
++><DIV
++CLASS="REFERENCE"
++><A
++NAME="MANPAGES"
++></A
++><DIV
++CLASS="TITLEPAGE"
++><H1
++CLASS="TITLE"
++>I. DVDAuthor Man Pages</H1
++><DIV
++CLASS="TOC"
++><DL
++><DT
++><B
++>Table of Contents</B
++></DT
++><DT
++><A
++HREF="dvdauthor.html"
++>dvdauthor</A
++>&nbsp;--&nbsp;assembles multiple mpeg program streams into a suitable DVD filesystem</DT
++><DT
++><A
++HREF="r2253.html"
++>dvddirdel</A
++>&nbsp;--&nbsp;	Deletes a previously authored DVD directory structure in DIR
++	</DT
++><DT
++><A
++HREF="r2287.html"
++>dvdunauthor</A
++>&nbsp;--&nbsp;	Removes DVD-Video file structure
++	</DT
++><DT
++><A
++HREF="r2319.html"
++>mpeg2desc</A
++>&nbsp;--&nbsp;	multiplex audio/video streams
++	</DT
++><DT
++><A
++HREF="spumux.html"
++>spumux</A
++>&nbsp;--&nbsp;generates and multiplexes subtitles into an existing mpeg2 program stream</DT
++><DT
++><A
++HREF="spuunmux.html"
++>spuunmux</A
++>&nbsp;--&nbsp;	demultiplexes subtitles from an existing mpeg2 program stream
++	</DT
++></DL
++></DIV
++></DIV
++></DIV
++><DIV
++CLASS="NAVFOOTER"
++><HR
++ALIGN="LEFT"
++WIDTH="100%"><TABLE
++SUMMARY="Footer navigation table"
++WIDTH="100%"
++BORDER="0"
++CELLPADDING="0"
++CELLSPACING="0"
++><TR
++><TD
++WIDTH="33%"
++ALIGN="left"
++VALIGN="top"
++><A
++HREF="languages.html"
++ACCESSKEY="P"
++>Prev</A
++></TD
++><TD
++WIDTH="34%"
++ALIGN="center"
++VALIGN="top"
++><A
++HREF="index.html"
++ACCESSKEY="H"
++>Home</A
++></TD
++><TD
++WIDTH="33%"
++ALIGN="right"
++VALIGN="top"
++><A
++HREF="dvdauthor.html"
++ACCESSKEY="N"
++>Next</A
++></TD
++></TR
++><TR
++><TD
++WIDTH="33%"
++ALIGN="left"
++VALIGN="top"
++>Language Codes</TD
++><TD
++WIDTH="34%"
++ALIGN="center"
++VALIGN="top"
++>&nbsp;</TD
++><TD
++WIDTH="33%"
++ALIGN="right"
++VALIGN="top"
++>dvdauthor</TD
++></TR
++></TABLE
++></DIV
++></BODY
++></HTML
++>
+\ No newline at end of file
+Index: dvdauthor-0.6.14/html/r2253.html
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ dvdauthor-0.6.14/html/r2253.html	2010-01-04 14:32:40.000000000 +0100
+@@ -0,0 +1,231 @@
++<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
++<HTML
++><HEAD
++><TITLE
++>dvddirdel</TITLE
++><META
++NAME="GENERATOR"
++CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
++REL="HOME"
++TITLE="DVDAuthor"
++HREF="index.html"><LINK
++REL="UP"
++TITLE="DVDAuthor Man Pages"
++HREF="manpages.html"><LINK
++REL="PREVIOUS"
++TITLE="dvdauthor"
++HREF="dvdauthor.html"><LINK
++REL="NEXT"
++TITLE="dvdunauthor"
++HREF="r2287.html"></HEAD
++><BODY
++CLASS="REFENTRY"
++BGCOLOR="#FFFFFF"
++TEXT="#000000"
++LINK="#0000FF"
++VLINK="#840084"
++ALINK="#0000FF"
++><DIV
++CLASS="NAVHEADER"
++><TABLE
++SUMMARY="Header navigation table"
++WIDTH="100%"
++BORDER="0"
++CELLPADDING="0"
++CELLSPACING="0"
++><TR
++><TH
++COLSPAN="3"
++ALIGN="center"
++>DVDAuthor</TH
++></TR
++><TR
++><TD
++WIDTH="10%"
++ALIGN="left"
++VALIGN="bottom"
++><A
++HREF="dvdauthor.html"
++ACCESSKEY="P"
++>Prev</A
++></TD
++><TD
++WIDTH="80%"
++ALIGN="center"
++VALIGN="bottom"
++></TD
++><TD
++WIDTH="10%"
++ALIGN="right"
++VALIGN="bottom"
++><A
++HREF="r2287.html"
++ACCESSKEY="N"
++>Next</A
++></TD
++></TR
++></TABLE
++><HR
++ALIGN="LEFT"
++WIDTH="100%"></DIV
++><H1
++><A
++NAME="AEN2253"
++></A
++>dvddirdel</H1
++><DIV
++CLASS="REFNAMEDIV"
++><A
++NAME="AEN2257"
++></A
++><H2
++>Name</H2
++>dvddirdel&nbsp;--&nbsp;	Deletes a previously authored DVD directory structure in DIR
++	</DIV
++><DIV
++CLASS="REFSYNOPSISDIV"
++><A
++NAME="AEN2260"
++></A
++><H2
++>Synopsis</H2
++><P
++><B
++CLASS="COMMAND"
++>dvddirdel</B
++>  [<CODE
++CLASS="OPTION"
++>-o </CODE
++><TT
++CLASS="REPLACEABLE"
++><I
++>DIR</I
++></TT
++>]</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2266"
++></A
++><H2
++>DESCRIPTION</H2
++><P
++>	<B
++CLASS="COMMAND"
++>dvddirdel</B
++> deletes a previously authored DVD directory structure in DIR
++	</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2270"
++></A
++><H2
++>USAGE</H2
++><P
++>	<B
++CLASS="COMMAND"
++>dvddirdel</B
++> -o DIR
++	</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2274"
++></A
++><H2
++>CAVEATS</H2
++><P
++>	None.
++	</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2277"
++></A
++><H2
++>BUGS</H2
++><P
++>	None.
++	</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2280"
++></A
++><H2
++>AUTHOR</H2
++><P
++>	Marc Leeman
++	</P
++></DIV
++><DIV
++CLASS="NAVFOOTER"
++><HR
++ALIGN="LEFT"
++WIDTH="100%"><TABLE
++SUMMARY="Footer navigation table"
++WIDTH="100%"
++BORDER="0"
++CELLPADDING="0"
++CELLSPACING="0"
++><TR
++><TD
++WIDTH="33%"
++ALIGN="left"
++VALIGN="top"
++><A
++HREF="dvdauthor.html"
++ACCESSKEY="P"
++>Prev</A
++></TD
++><TD
++WIDTH="34%"
++ALIGN="center"
++VALIGN="top"
++><A
++HREF="index.html"
++ACCESSKEY="H"
++>Home</A
++></TD
++><TD
++WIDTH="33%"
++ALIGN="right"
++VALIGN="top"
++><A
++HREF="r2287.html"
++ACCESSKEY="N"
++>Next</A
++></TD
++></TR
++><TR
++><TD
++WIDTH="33%"
++ALIGN="left"
++VALIGN="top"
++>dvdauthor</TD
++><TD
++WIDTH="34%"
++ALIGN="center"
++VALIGN="top"
++><A
++HREF="manpages.html"
++ACCESSKEY="U"
++>Up</A
++></TD
++><TD
++WIDTH="33%"
++ALIGN="right"
++VALIGN="top"
++>dvdunauthor</TD
++></TR
++></TABLE
++></DIV
++></BODY
++></HTML
++>
+Index: dvdauthor-0.6.14/html/r2287.html
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ dvdauthor-0.6.14/html/r2287.html	2010-01-04 14:32:30.000000000 +0100
+@@ -0,0 +1,223 @@
++<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
++<HTML
++><HEAD
++><TITLE
++>dvdunauthor</TITLE
++><META
++NAME="GENERATOR"
++CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
++REL="HOME"
++TITLE="DVDAuthor"
++HREF="index.html"><LINK
++REL="UP"
++TITLE="DVDAuthor Man Pages"
++HREF="manpages.html"><LINK
++REL="PREVIOUS"
++TITLE="dvddirdel"
++HREF="r2253.html"><LINK
++REL="NEXT"
++TITLE="mpeg2desc"
++HREF="r2319.html"></HEAD
++><BODY
++CLASS="REFENTRY"
++BGCOLOR="#FFFFFF"
++TEXT="#000000"
++LINK="#0000FF"
++VLINK="#840084"
++ALINK="#0000FF"
++><DIV
++CLASS="NAVHEADER"
++><TABLE
++SUMMARY="Header navigation table"
++WIDTH="100%"
++BORDER="0"
++CELLPADDING="0"
++CELLSPACING="0"
++><TR
++><TH
++COLSPAN="3"
++ALIGN="center"
++>DVDAuthor</TH
++></TR
++><TR
++><TD
++WIDTH="10%"
++ALIGN="left"
++VALIGN="bottom"
++><A
++HREF="r2253.html"
++ACCESSKEY="P"
++>Prev</A
++></TD
++><TD
++WIDTH="80%"
++ALIGN="center"
++VALIGN="bottom"
++></TD
++><TD
++WIDTH="10%"
++ALIGN="right"
++VALIGN="bottom"
++><A
++HREF="r2319.html"
++ACCESSKEY="N"
++>Next</A
++></TD
++></TR
++></TABLE
++><HR
++ALIGN="LEFT"
++WIDTH="100%"></DIV
++><H1
++><A
++NAME="AEN2287"
++></A
++>dvdunauthor</H1
++><DIV
++CLASS="REFNAMEDIV"
++><A
++NAME="AEN2291"
++></A
++><H2
++>Name</H2
++>dvdunauthor&nbsp;--&nbsp;	Removes DVD-Video file structure
++	</DIV
++><DIV
++CLASS="REFSYNOPSISDIV"
++><A
++NAME="AEN2294"
++></A
++><H2
++>Synopsis</H2
++><P
++><B
++CLASS="COMMAND"
++>dvdunauthor</B
++>  [path]</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2298"
++></A
++><H2
++>DESCRIPTION</H2
++><P
++>	<B
++CLASS="COMMAND"
++>dvdunauthor</B
++> removes the DVD-Video file structure
++	</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2302"
++></A
++><H2
++>USAGE</H2
++><P
++>	<B
++CLASS="COMMAND"
++>dvdunauthor</B
++> path
++	</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2306"
++></A
++><H2
++>CAVEATS</H2
++><P
++>	None.
++	</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2309"
++></A
++><H2
++>BUGS</H2
++><P
++>	None.
++	</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2312"
++></A
++><H2
++>AUTHOR</H2
++><P
++>	Marc Leeman
++	</P
++></DIV
++><DIV
++CLASS="NAVFOOTER"
++><HR
++ALIGN="LEFT"
++WIDTH="100%"><TABLE
++SUMMARY="Footer navigation table"
++WIDTH="100%"
++BORDER="0"
++CELLPADDING="0"
++CELLSPACING="0"
++><TR
++><TD
++WIDTH="33%"
++ALIGN="left"
++VALIGN="top"
++><A
++HREF="r2253.html"
++ACCESSKEY="P"
++>Prev</A
++></TD
++><TD
++WIDTH="34%"
++ALIGN="center"
++VALIGN="top"
++><A
++HREF="index.html"
++ACCESSKEY="H"
++>Home</A
++></TD
++><TD
++WIDTH="33%"
++ALIGN="right"
++VALIGN="top"
++><A
++HREF="r2319.html"
++ACCESSKEY="N"
++>Next</A
++></TD
++></TR
++><TR
++><TD
++WIDTH="33%"
++ALIGN="left"
++VALIGN="top"
++>dvddirdel</TD
++><TD
++WIDTH="34%"
++ALIGN="center"
++VALIGN="top"
++><A
++HREF="manpages.html"
++ACCESSKEY="U"
++>Up</A
++></TD
++><TD
++WIDTH="33%"
++ALIGN="right"
++VALIGN="top"
++>mpeg2desc</TD
++></TR
++></TABLE
++></DIV
++></BODY
++></HTML
++>
+Index: dvdauthor-0.6.14/html/r2319.html
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ dvdauthor-0.6.14/html/r2319.html	2010-01-04 14:32:00.000000000 +0100
+@@ -0,0 +1,342 @@
++<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
++<HTML
++><HEAD
++><TITLE
++>mpeg2desc</TITLE
++><META
++NAME="GENERATOR"
++CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
++REL="HOME"
++TITLE="DVDAuthor"
++HREF="index.html"><LINK
++REL="UP"
++TITLE="DVDAuthor Man Pages"
++HREF="manpages.html"><LINK
++REL="PREVIOUS"
++TITLE="dvdunauthor"
++HREF="r2287.html"><LINK
++REL="NEXT"
++TITLE="spumux"
++HREF="spumux.html"></HEAD
++><BODY
++CLASS="REFENTRY"
++BGCOLOR="#FFFFFF"
++TEXT="#000000"
++LINK="#0000FF"
++VLINK="#840084"
++ALINK="#0000FF"
++><DIV
++CLASS="NAVHEADER"
++><TABLE
++SUMMARY="Header navigation table"
++WIDTH="100%"
++BORDER="0"
++CELLPADDING="0"
++CELLSPACING="0"
++><TR
++><TH
++COLSPAN="3"
++ALIGN="center"
++>DVDAuthor</TH
++></TR
++><TR
++><TD
++WIDTH="10%"
++ALIGN="left"
++VALIGN="bottom"
++><A
++HREF="r2287.html"
++ACCESSKEY="P"
++>Prev</A
++></TD
++><TD
++WIDTH="80%"
++ALIGN="center"
++VALIGN="bottom"
++></TD
++><TD
++WIDTH="10%"
++ALIGN="right"
++VALIGN="bottom"
++><A
++HREF="spumux.html"
++ACCESSKEY="N"
++>Next</A
++></TD
++></TR
++></TABLE
++><HR
++ALIGN="LEFT"
++WIDTH="100%"></DIV
++><H1
++><A
++NAME="AEN2319"
++></A
++>mpeg2desc</H1
++><DIV
++CLASS="REFNAMEDIV"
++><A
++NAME="AEN2323"
++></A
++><H2
++>Name</H2
++>mpeg2desc&nbsp;--&nbsp;	multiplex audio/video streams
++	</DIV
++><DIV
++CLASS="REFSYNOPSISDIV"
++><A
++NAME="AEN2326"
++></A
++><H2
++>Synopsis</H2
++><P
++><B
++CLASS="COMMAND"
++>mpeg2desc</B
++>  [<CODE
++CLASS="OPTION"
++>-a </CODE
++><TT
++CLASS="REPLACEABLE"
++><I
++>stream</I
++></TT
++>] [<CODE
++CLASS="OPTION"
++>-v </CODE
++><TT
++CLASS="REPLACEABLE"
++><I
++>stream</I
++></TT
++>] [<CODE
++CLASS="OPTION"
++>-o </CODE
++><TT
++CLASS="REPLACEABLE"
++><I
++>FILE</I
++></TT
++>] [<CODE
++CLASS="OPTION"
++>-s </CODE
++>] [<CODE
++CLASS="OPTION"
++>-m </CODE
++>] [<CODE
++CLASS="OPTION"
++>-h </CODE
++>] [<TT
++CLASS="REPLACEABLE"
++><I
++>&#60; movie.mpg</I
++></TT
++>...]</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2346"
++></A
++><H2
++>DESCRIPTION</H2
++><P
++>	<B
++CLASS="COMMAND"
++>mpeg2desc</B
++> multiplexes audio and video streams
++	</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2350"
++></A
++><H2
++>OPTIONS</H2
++><P
++></P
++><DIV
++CLASS="VARIABLELIST"
++><DL
++><DT
++>-a <TT
++CLASS="REPLACEABLE"
++><I
++>stream</I
++></TT
++></DT
++><DD
++><P
++>			Output audio <TT
++CLASS="FILENAME"
++>stream</TT
++> to stdout
++			</P
++></DD
++><DT
++>-v <TT
++CLASS="REPLACEABLE"
++><I
++>stream</I
++></TT
++></DT
++><DD
++><P
++>			Output video <TT
++CLASS="FILENAME"
++>stream</TT
++> to stdout
++			</P
++></DD
++><DT
++>-o <TT
++CLASS="REPLACEABLE"
++><I
++>FILE</I
++></TT
++></DT
++><DD
++><P
++>			output the previous stream to <TT
++CLASS="FILENAME"
++>FILE</TT
++> instead of stdout
++			</P
++></DD
++><DT
++>-s</DT
++><DD
++><P
++>			skip to first valid header -- ensures mplex can handle output
++			</P
++></DD
++><DT
++>-m</DT
++><DD
++><P
++>			output mplex offset to stdout
++			</P
++></DD
++><DT
++>-h</DT
++><DD
++><P
++>			show short help
++			</P
++></DD
++></DL
++></DIV
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2383"
++></A
++><H2
++>USAGE</H2
++><P
++>	<B
++CLASS="COMMAND"
++>mpeg2desc</B
++> mpeg2desc [options] &#60; movie.mpg
++	</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2387"
++></A
++><H2
++>CAVEATS</H2
++><P
++>	None.
++	</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2390"
++></A
++><H2
++>BUGS</H2
++><P
++>	None.
++	</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2393"
++></A
++><H2
++>AUTHOR</H2
++><P
++>	Marc Leeman
++	</P
++></DIV
++><DIV
++CLASS="NAVFOOTER"
++><HR
++ALIGN="LEFT"
++WIDTH="100%"><TABLE
++SUMMARY="Footer navigation table"
++WIDTH="100%"
++BORDER="0"
++CELLPADDING="0"
++CELLSPACING="0"
++><TR
++><TD
++WIDTH="33%"
++ALIGN="left"
++VALIGN="top"
++><A
++HREF="r2287.html"
++ACCESSKEY="P"
++>Prev</A
++></TD
++><TD
++WIDTH="34%"
++ALIGN="center"
++VALIGN="top"
++><A
++HREF="index.html"
++ACCESSKEY="H"
++>Home</A
++></TD
++><TD
++WIDTH="33%"
++ALIGN="right"
++VALIGN="top"
++><A
++HREF="spumux.html"
++ACCESSKEY="N"
++>Next</A
++></TD
++></TR
++><TR
++><TD
++WIDTH="33%"
++ALIGN="left"
++VALIGN="top"
++>dvdunauthor</TD
++><TD
++WIDTH="34%"
++ALIGN="center"
++VALIGN="top"
++><A
++HREF="manpages.html"
++ACCESSKEY="U"
++>Up</A
++></TD
++><TD
++WIDTH="33%"
++ALIGN="right"
++VALIGN="top"
++>spumux</TD
++></TR
++></TABLE
++></DIV
++></BODY
++></HTML
++>
+\ No newline at end of file
+Index: dvdauthor-0.6.14/html/spumux.html
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ dvdauthor-0.6.14/html/spumux.html	2010-01-04 14:33:15.000000000 +0100
+@@ -0,0 +1,496 @@
++<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
++<HTML
++><HEAD
++><TITLE
++>spumux</TITLE
++><META
++NAME="GENERATOR"
++CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
++REL="HOME"
++TITLE="DVDAuthor"
++HREF="index.html"><LINK
++REL="UP"
++TITLE="DVDAuthor Man Pages"
++HREF="manpages.html"><LINK
++REL="PREVIOUS"
++TITLE="mpeg2desc"
++HREF="r2319.html"><LINK
++REL="NEXT"
++TITLE="spuunmux"
++HREF="spuunmux.html"></HEAD
++><BODY
++CLASS="REFENTRY"
++BGCOLOR="#FFFFFF"
++TEXT="#000000"
++LINK="#0000FF"
++VLINK="#840084"
++ALINK="#0000FF"
++><DIV
++CLASS="NAVHEADER"
++><TABLE
++SUMMARY="Header navigation table"
++WIDTH="100%"
++BORDER="0"
++CELLPADDING="0"
++CELLSPACING="0"
++><TR
++><TH
++COLSPAN="3"
++ALIGN="center"
++>DVDAuthor</TH
++></TR
++><TR
++><TD
++WIDTH="10%"
++ALIGN="left"
++VALIGN="bottom"
++><A
++HREF="r2319.html"
++ACCESSKEY="P"
++>Prev</A
++></TD
++><TD
++WIDTH="80%"
++ALIGN="center"
++VALIGN="bottom"
++></TD
++><TD
++WIDTH="10%"
++ALIGN="right"
++VALIGN="bottom"
++><A
++HREF="spuunmux.html"
++ACCESSKEY="N"
++>Next</A
++></TD
++></TR
++></TABLE
++><HR
++ALIGN="LEFT"
++WIDTH="100%"></DIV
++><H1
++><A
++NAME="SPUMUX"
++></A
++>spumux</H1
++><DIV
++CLASS="REFNAMEDIV"
++><A
++NAME="AEN2404"
++></A
++><H2
++>Name</H2
++>spumux&nbsp;--&nbsp;generates and multiplexes subtitles into an existing mpeg2 program stream</DIV
++><DIV
++CLASS="REFSYNOPSISDIV"
++><A
++NAME="AEN2407"
++></A
++><H2
++>Synopsis</H2
++><P
++><B
++CLASS="COMMAND"
++>spumux</B
++>  [-m dvd | -m cvd | -m svcd] [-s <TT
++CLASS="REPLACEABLE"
++><I
++>stream</I
++></TT
++>] [-v <TT
++CLASS="REPLACEABLE"
++><I
++>level</I
++></TT
++>] [-P] {<TT
++CLASS="REPLACEABLE"
++><I
++>file</I
++></TT
++>} {&lt; <TT
++CLASS="REPLACEABLE"
++><I
++>mpeg</I
++></TT
++>} {&gt; <TT
++CLASS="REPLACEABLE"
++><I
++>mpeg-with-subtitles</I
++></TT
++>}</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2425"
++></A
++><H2
++>Description</H2
++><P
++><B
++CLASS="COMMAND"
++>spumux</B
++> encodes the subtitles and multiplexes it into the mpeg2 program stream.</P
++><DIV
++CLASS="GLOSSLIST"
++><DL
++><DT
++><B
++>-m <TT
++CLASS="REPLACEABLE"
++><I
++>mode</I
++></TT
++></B
++></DT
++><DD
++><P
++>&#13;Sets the encoding for the subtitles.  Can be dvd, cvd, or svcd.
++Default is dvd.&#13;</P
++></DD
++><DT
++><B
++>-s <TT
++CLASS="REPLACEABLE"
++><I
++>stream</I
++></TT
++></B
++></DT
++><DD
++><P
++>Sets the subtitle stream id.  Default is 0.</P
++></DD
++><DT
++><B
++>-v <TT
++CLASS="REPLACEABLE"
++><I
++>level</I
++></TT
++></B
++></DT
++><DD
++><P
++>Sets the verbosity level.</P
++></DD
++><DT
++><B
++>-P</B
++></DT
++><DD
++><P
++>Enables a progress bar.</P
++></DD
++></DL
++></DIV
++><P
++>Here's a sample configuration file:</P
++><PRE
++CLASS="SYNOPSIS"
++>&lt;subpictures&gt;
++   &lt;stream&gt;
++      &lt;spu start="<TT
++CLASS="REPLACEABLE"
++><I
++>start-time</I
++></TT
++>" [ end="<TT
++CLASS="REPLACEABLE"
++><I
++>end-time</I
++></TT
++>" ] [ image="<TT
++CLASS="REPLACEABLE"
++><I
++>picture.png</I
++></TT
++>" ]
++           [ highlight="<TT
++CLASS="REPLACEABLE"
++><I
++>picture.png</I
++></TT
++>" ] [ select="<TT
++CLASS="REPLACEABLE"
++><I
++>picture.png</I
++></TT
++>" ]
++           [ transparent="<TT
++CLASS="REPLACEABLE"
++><I
++>color-code</I
++></TT
++>" ] [ force="yes" ]
++           [ autooutline="infer" [ outlinewidth="<TT
++CLASS="REPLACEABLE"
++><I
++>width</I
++></TT
++>" ]
++             [ autoorder="rows" | autoorder="columns" ] ]
++           [ xoffset="<TT
++CLASS="REPLACEABLE"
++><I
++>x-coord</I
++></TT
++>" yoffset="<TT
++CLASS="REPLACEABLE"
++><I
++>y-coord</I
++></TT
++>" ] &gt;
++         &lt;button [ name="<TT
++CLASS="REPLACEABLE"
++><I
++>name</I
++></TT
++>" ] [ x0="<TT
++CLASS="REPLACEABLE"
++><I
++>x0</I
++></TT
++>" ] [ y0="<TT
++CLASS="REPLACEABLE"
++><I
++>y0</I
++></TT
++>" ] [ x1="<TT
++CLASS="REPLACEABLE"
++><I
++>x1</I
++></TT
++>" ]
++                 [ y1="<TT
++CLASS="REPLACEABLE"
++><I
++>y1</I
++></TT
++>" ] [ up="<TT
++CLASS="REPLACEABLE"
++><I
++>name</I
++></TT
++>" ] [ down="<TT
++CLASS="REPLACEABLE"
++><I
++>name</I
++></TT
++>" ]
++                 [ left="<TT
++CLASS="REPLACEABLE"
++><I
++>name</I
++></TT
++>" ] [ right="<TT
++CLASS="REPLACEABLE"
++><I
++>name</I
++></TT
++>" ] /&gt;
++         &lt;action [ name="<TT
++CLASS="REPLACEABLE"
++><I
++>name</I
++></TT
++>" ] /&gt;
++      &lt;/spu&gt;
++   &lt;/stream&gt;
++&lt;/subpictures&gt;</PRE
++><P
++>&#13;Each subtitle image is described by an &lt;spu&gt; tag.  The start and
++optional end attributes describe when the subtitle will be displayed
++on the screen, in "HR:MM:SS.HU".  The image attribute describes the
++main subtitle image, which can either be a PNG or BMP file.  If your
++image is not a full screen image, you can use xoffset and yoffset to
++move the picture around.  In the advent that the author is unable to
++use a graphics format with an alpha channel, then the transparent
++attribute can be used to describe which color should become fully
++transparent.  The color is in hexadecimal as "RRGGBB".  If you want to
++force the display of the subtitle, regardless of whether the user has
++enabled subtitles or not, you can use the force tag.  When you are
++making menus, the force tag is required.&#13;</P
++><P
++>&#13;The remaining attributes and tags are related to menu creation.  The
++highlight attribute shows what all the buttons look like when they are
++highlighted (i.e. when you are using the arrows in the menu), and the
++select attribute shows what all the buttons look like when the are
++selected (i.e. for the 1-2 seconds after you press enter in the menu).
++If either of these (or the image attribute) are omitted, then spumux
++creates a blank (totally transparent) image.  Obviously at least one
++tag should be specified.&#13;</P
++><P
++>&#13;To aid in button creation, the autooutline attribute instructs spumux
++to infer where the buttons are located.  It does this by attempting to
++draw rectangles around a composition of the highlight and select
++images which do not intersect any opaque or semi-opaque pixels.  In
++order to support textual buttons, the attribute outlinewidth allows
++you to specify the width of the rectangle which is tested.  Wider
++rectangles won't be able to squeeze between the letters.  Finally,
++autoorder describes which way to order the automatically detected
++buttons, which is important for numerically selected buttons and for
++mapping buttons to button names or to the implied names.&#13;</P
++><P
++>&#13;The button and action tags describe the buttons (visibly selectable
++objects on the screen) and actions (commands that are executed as soon
++as the associated key is pressed on the remote).  If you are using the
++autooutline feature, just designing buttons, are happy with the
++inferred button navigation, and can deal with the simplistic naming
++system, then you actually do not even need to specify any buttons or
++actions.  Otherwise, read on.&#13;</P
++><P
++>&#13;The name attribute is used to give a button or action an easy to refer
++to name.  By default they are numbered sequentially starting with "1".
++The up, down, left, and right names describe which button or action
++should be tied to the corresponding key when the current button is
++highlighted, though if omitted spumux will use a reasonably
++intelligent algorithm to determine which buttons to move to.&#13;</P
++><P
++>&#13;The (x0,y0) coordinates describe the upper left hand corner
++inclusively, while the (x1,y1) coordinates describe the lower right
++hand corner EXclusively.  The coordinates start at 0,0 for the upper
++left hand corner.  Ideally, the y0 and y1 coordinates should both be
++even, so the button edges fully empasses two interlaced scanlines,
++even if there is no data in the extra scanline.  Some DVD players will
++fill in the extra scanline if it is not specified; spumux makes an
++effort to ensure that will be transparent but there is no guarantee.&#13;</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2476"
++></A
++><H2
++>Handling text based subtitles</H2
++><P
++>&#13;Spumux is also able to handle text subtitles, which will be rendered to
++graphics by spumux. A lot of different text (must be non-graphic) formats
++are supported (.sub, .srt, .ssa, .smi, .rt , .txt, .aqt, .jss, .js, ass).
++Spumux will try to determine the format automatically. &#13;</P
++><P
++>&#13;If processing textbased subtitles no other streams can be defined, buttons
++or others need to be processed in another pass with spumux, using another
++xml file.&#13;</P
++><P
++>&#13;Following .xml file shows the available tags and their default settings.
++Only the textsub tag is mandatory, defaults are used if the specific tag
++is not specified.&#13;</P
++><PRE
++CLASS="SYNOPSIS"
++>&lt;subpictures&gt;
++   &lt;stream&gt;
++      &lt;textsub filename="demo1.srt" characterset="ISO8859-1"
++         fontsize="28.0" font="arial.ttf" horizontal-alignment="left"
++         vertical-alignment="bottom" left-margin="60" right-margin="60"
++         top-margin="20" bottom-margin="30" subtitle-fps="25"
++         movie-fps="25" movie-width="720" movie-height="574"
++         force="yes"
++      /&gt;
++   &lt;/stream&gt;
++&lt;/subpictures&gt;</PRE
++><P
++>&#13;The textsub tag defines the settings for the text to graphics rendering. &#13;</P
++><P
++>&#13;The filename attribute defines the path and name of the input text subtitle
++file, this is the only attribute that is mandatory.&#13;</P
++><P
++>&#13;The characterset attribute defines the characterset to be used, available
++charactersets can be found at http://www.gnu.org/software/libiconv.&#13;</P
++><P
++>&#13;The fontsize attribute defines the size of the font in font units.
++The font attribute defines the font used. Spumux will look into the home
++directory in subdirectory .spumux for fonts on linux systems and will
++look into the windows/fonts and subdirectory spumux of the cygwin/mingw
++home directory and into the exucution directory for windows based
++execution for the specified font. Looking for free fonts? One listing is
++here http://www.microsoft.com/typography/links/links.asp?type=free&amp;part=1
++(this is only about fonts, not about operating systems).&#13;</P
++><P
++>&#13;The horizontal-alignment attribute defines the horizontal alignment of the
++subtitles. Options are: "left", "right", "center" and "default".
++The "default" value causes spumux to use the attribute that is in the text
++subtitle file if the format supports such an attribute.&#13;</P
++><P
++>&#13;The vertical-alignment attribute defines the vertical alignment.
++Options are: "top", "center" and "bottom".&#13;</P
++><P
++>&#13;The margin attributes define the minimum blank pixel space between the
++border of the image and the border of the subtitle lines.&#13;</P
++><P
++>&#13;Defining the subtitle-fps and movie-fps attributes make it possible for
++spumux to recalculate the subtitle timing if these are not the same.&#13;</P
++><P
++>&#13;The movie-width and movie-height attributes define the maximum size of
++the subtitle page, these shouldn't be larger than the fram-size of the
++movie frame, normally they are the same. Some DVD-players more like
++subtitle frames that are 2 or 4 pixels smaller in height.&#13;</P
++><P
++>&#13;The force option allows you to force the display of the subtitle,
++regardless of whether the user has enabled subtitles or not.&#13;</P
++></DIV
++><DIV
++CLASS="NAVFOOTER"
++><HR
++ALIGN="LEFT"
++WIDTH="100%"><TABLE
++SUMMARY="Footer navigation table"
++WIDTH="100%"
++BORDER="0"
++CELLPADDING="0"
++CELLSPACING="0"
++><TR
++><TD
++WIDTH="33%"
++ALIGN="left"
++VALIGN="top"
++><A
++HREF="r2319.html"
++ACCESSKEY="P"
++>Prev</A
++></TD
++><TD
++WIDTH="34%"
++ALIGN="center"
++VALIGN="top"
++><A
++HREF="index.html"
++ACCESSKEY="H"
++>Home</A
++></TD
++><TD
++WIDTH="33%"
++ALIGN="right"
++VALIGN="top"
++><A
++HREF="spuunmux.html"
++ACCESSKEY="N"
++>Next</A
++></TD
++></TR
++><TR
++><TD
++WIDTH="33%"
++ALIGN="left"
++VALIGN="top"
++>mpeg2desc</TD
++><TD
++WIDTH="34%"
++ALIGN="center"
++VALIGN="top"
++><A
++HREF="manpages.html"
++ACCESSKEY="U"
++>Up</A
++></TD
++><TD
++WIDTH="33%"
++ALIGN="right"
++VALIGN="top"
++>spuunmux</TD
++></TR
++></TABLE
++></DIV
++></BODY
++></HTML
++>
+Index: dvdauthor-0.6.14/html/spuunmux.html
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ dvdauthor-0.6.14/html/spuunmux.html	2010-01-04 14:32:00.000000000 +0100
+@@ -0,0 +1,340 @@
++<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
++<HTML
++><HEAD
++><TITLE
++>spuunmux</TITLE
++><META
++NAME="GENERATOR"
++CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
++REL="HOME"
++TITLE="DVDAuthor"
++HREF="index.html"><LINK
++REL="UP"
++TITLE="DVDAuthor Man Pages"
++HREF="manpages.html"><LINK
++REL="PREVIOUS"
++TITLE="spumux"
++HREF="spumux.html"></HEAD
++><BODY
++CLASS="REFENTRY"
++BGCOLOR="#FFFFFF"
++TEXT="#000000"
++LINK="#0000FF"
++VLINK="#840084"
++ALINK="#0000FF"
++><DIV
++CLASS="NAVHEADER"
++><TABLE
++SUMMARY="Header navigation table"
++WIDTH="100%"
++BORDER="0"
++CELLPADDING="0"
++CELLSPACING="0"
++><TR
++><TH
++COLSPAN="3"
++ALIGN="center"
++>DVDAuthor</TH
++></TR
++><TR
++><TD
++WIDTH="10%"
++ALIGN="left"
++VALIGN="bottom"
++><A
++HREF="spumux.html"
++ACCESSKEY="P"
++>Prev</A
++></TD
++><TD
++WIDTH="80%"
++ALIGN="center"
++VALIGN="bottom"
++></TD
++><TD
++WIDTH="10%"
++ALIGN="right"
++VALIGN="bottom"
++>&nbsp;</TD
++></TR
++></TABLE
++><HR
++ALIGN="LEFT"
++WIDTH="100%"></DIV
++><H1
++><A
++NAME="SPUUNMUX"
++></A
++>spuunmux</H1
++><DIV
++CLASS="REFNAMEDIV"
++><A
++NAME="AEN2496"
++></A
++><H2
++>Name</H2
++>spuunmux&nbsp;--&nbsp;	demultiplexes subtitles from an existing mpeg2 program stream
++	</DIV
++><DIV
++CLASS="REFSYNOPSISDIV"
++><A
++NAME="AEN2499"
++></A
++><H2
++>Synopsis</H2
++><P
++><B
++CLASS="COMMAND"
++>spuunmux</B
++>  [<TT
++CLASS="REPLACEABLE"
++><I
++>input file</I
++></TT
++>] [<TT
++CLASS="REPLACEABLE"
++><I
++>input file</I
++></TT
++>...]</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2506"
++></A
++><H2
++>DESCRIPTION</H2
++><P
++>	<B
++CLASS="COMMAND"
++>spuunmux</B
++> demultiplexes subtitles from an existing mpeg2 program stream
++	</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2510"
++></A
++><H2
++>OPTIONS</H2
++><P
++></P
++><DIV
++CLASS="VARIABLELIST"
++><DL
++><DT
++>-o <TT
++CLASS="REPLACEABLE"
++><I
++>name</I
++></TT
++></DT
++><DD
++><P
++>			 base name for script and images. Defaults to <TT
++CLASS="REPLACEABLE"
++><I
++>sub</I
++></TT
++>.
++			</P
++></DD
++><DT
++>-v <TT
++CLASS="REPLACEABLE"
++><I
++>level</I
++></TT
++></DT
++><DD
++><P
++>			 verbosity level. <TT
++CLASS="REPLACEABLE"
++><I
++>sub</I
++></TT
++>. Defaults to <TT
++CLASS="REPLACEABLE"
++><I
++>0</I
++></TT
++>.
++			</P
++></DD
++><DT
++>-f</DT
++><DD
++><P
++>			resize images to full size. Defaults to <TT
++CLASS="REPLACEABLE"
++><I
++>720x576</I
++></TT
++>.
++			</P
++></DD
++><DT
++>-s <TT
++CLASS="REPLACEABLE"
++><I
++>stream</I
++></TT
++></DT
++><DD
++><P
++>			 number of the substream to extract. Defaults to <TT
++CLASS="REPLACEABLE"
++><I
++>0</I
++></TT
++>.
++			</P
++></DD
++><DT
++>-p <TT
++CLASS="REPLACEABLE"
++><I
++>file</I
++></TT
++></DT
++><DD
++><P
++>			name of file with dvd palette. If palette file ends with .rgb, treated as a RGB else as a YCbCr color
++			</P
++></DD
++><DT
++>-h</DT
++><DD
++><P
++>			 print this help
++			</P
++></DD
++><DT
++>-V</DT
++><DD
++><P
++>			 print version number
++			</P
++></DD
++></DL
++></DIV
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2550"
++></A
++><H2
++>USAGE</H2
++><P
++>	<B
++CLASS="COMMAND"
++>spuunmux</B
++> inputfile1 inputfile2
++	</P
++><P
++>	demultiplexes subtitles from an existing mpeg2 program stream. To use stdin for demultiplexing, use - for the inputfile:
++	</P
++><P
++>	play_cell GoldFinger.iso 1 1 6 | <B
++CLASS="COMMAND"
++>spuunmux</B
++> -
++	</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2557"
++></A
++><H2
++>CAVEATS</H2
++><P
++>	None.
++	</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2560"
++></A
++><H2
++>BUGS</H2
++><P
++>	None.
++	</P
++></DIV
++><DIV
++CLASS="REFSECT1"
++><A
++NAME="AEN2563"
++></A
++><H2
++>AUTHOR</H2
++><P
++>	Marc Leeman
++	</P
++></DIV
++><DIV
++CLASS="NAVFOOTER"
++><HR
++ALIGN="LEFT"
++WIDTH="100%"><TABLE
++SUMMARY="Footer navigation table"
++WIDTH="100%"
++BORDER="0"
++CELLPADDING="0"
++CELLSPACING="0"
++><TR
++><TD
++WIDTH="33%"
++ALIGN="left"
++VALIGN="top"
++><A
++HREF="spumux.html"
++ACCESSKEY="P"
++>Prev</A
++></TD
++><TD
++WIDTH="34%"
++ALIGN="center"
++VALIGN="top"
++><A
++HREF="index.html"
++ACCESSKEY="H"
++>Home</A
++></TD
++><TD
++WIDTH="33%"
++ALIGN="right"
++VALIGN="top"
++>&nbsp;</TD
++></TR
++><TR
++><TD
++WIDTH="33%"
++ALIGN="left"
++VALIGN="top"
++>spumux</TD
++><TD
++WIDTH="34%"
++ALIGN="center"
++VALIGN="top"
++><A
++HREF="manpages.html"
++ACCESSKEY="U"
++>Up</A
++></TD
++><TD
++WIDTH="33%"
++ALIGN="right"
++VALIGN="top"
++>&nbsp;</TD
++></TR
++></TABLE
++></DIV
++></BODY
++></HTML
++>
+\ No newline at end of file
