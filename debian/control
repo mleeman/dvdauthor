@@ -5,7 +5,6 @@ Maintainer: Marc Leeman <marc.leeman@gmail.com>
 Build-Depends: debhelper (>= 10),
                 bison,
                 cdbs,
-                dh-autoreconf,
                 docbook-to-man,
                 docbook-utils,
                 flex,
