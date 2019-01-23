@@ -1,0 +1,56 @@
+From 72c496681904056b9c72080371ef4fac5e595fd5 Mon Sep 17 00:00:00 2001
+From: Marc Leeman <marc.leeman@gmail.com>
+Date: Wed, 23 Jan 2019 15:07:51 +0100
+Subject: [PATCH] autotools: use pkg-config to test freetype2
+
+---
+ configure.ac    | 19 +++----------------
+ src/Makefile.am |  2 +-
+ 2 files changed, 4 insertions(+), 17 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index f4b270f..cedb2dc 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -84,22 +84,9 @@ PKG_CHECK_MODULES([FRIBIDI], [fribidi], [AC_DEFINE(HAVE_FRIBIDI, 1, [whether Fri
+ AC_SUBST(FRIBIDI_CFLAGS)
+ AC_SUBST(FRIBIDI_LIBS)
+ 
+-AC_CHECK_PROGS(FREETYPECONFIG, [freetype-config])
+-if test -n "$FREETYPECONFIG"; then
+-    FREETYPE_CPPFLAGS="`$FREETYPECONFIG --cflags`"
+-    FREETYPE_LIBS="`$FREETYPECONFIG --libs $config_static`"
+-    AC_DEFINE(HAVE_FREETYPE, 1, [Whether FreeType is available])
+-
+-    ac_save_CPPFLAGS="$CPPFLAGS"
+-    CPPFLAGS="$CPPFLAGS $FREETYPE_CPPFLAGS"
+-    AC_CHECK_HEADERS(ft2build.h)
+-    CPPFLAGS="$ac_save_CPPFLAGS"
+-    AC_SUBST(FREETYPE_CPPFLAGS)
+-    AC_SUBST(FREETYPE_LIBS)
+-else
+-    AC_MSG_ERROR([freetype not found])
+-fi
+-
++PKG_CHECK_MODULES([FREETYPE], [freetype2], [AC_DEFINE(HAVE_FREETYPE, 1, [whether FreeType2 is available])], [:])
++AC_SUBST(FREETYPE_CFLAGS)
++AC_SUBST(FREETYPE_LIBS)
+ 
+ AC_ARG_ENABLE([default-video-format],
+ AS_HELP_STRING([--enable-default-video-format=format], [specify a default video format, either NTSC or PAL, to be used if no configuration or input setting is given]),
+diff --git a/src/Makefile.am b/src/Makefile.am
+index c7f89a9..b121dfb 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -8,7 +8,7 @@ endif
+ nodist_bin_SCRIPTS = dvddirdel
+ 
+ AM_CPPFLAGS = -DSYSCONFDIR="\"$(sysconfdir)\"" \
+-    @XML_CPPFLAGS@ @MAGICK_CPPFLAGS@ @FREETYPE_CPPFLAGS@ @FRIBIDI_CFLAGS@ @FONTCONFIG_CFLAGS@
++    @XML_CPPFLAGS@ @MAGICK_CPPFLAGS@ @FREETYPE_CFLAGS@ @FRIBIDI_CFLAGS@ @FONTCONFIG_CFLAGS@
+ AM_CFLAGS = -Wall
+ 
+ dvdauthor_SOURCES = dvdauthor.c common.h dvdauthor.h da-internal.h \
+-- 
+2.19.2
+

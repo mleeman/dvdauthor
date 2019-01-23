@@ -1,6 +1,6 @@
 dvdauthor (0.7.2-1) unstable; urgency=medium
 
-  * new upstream release 0.7.2 (Closes: #920207)
+  * new upstream release 0.7.2 (Closes: #920207, Closes: #690300)
 
  -- Marc Leeman <marc.leeman@gmail.com>  Wed, 23 Jan 2019 13:48:34 +0100
 

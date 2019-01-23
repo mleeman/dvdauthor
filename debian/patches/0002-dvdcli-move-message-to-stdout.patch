@@ -1,0 +1,25 @@
+From d5c634cb68cb6108be423d202f9753953122c3cf Mon Sep 17 00:00:00 2001
+From: Marc Leeman <marc.leeman@gmail.com>
+Date: Wed, 23 Jan 2019 14:26:01 +0100
+Subject: [PATCH] dvdcli: move message to stdout
+
+---
+ src/dvdcli.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/dvdcli.c b/src/dvdcli.c
+index a4c6b98..0d11987 100644
+--- a/src/dvdcli.c
++++ b/src/dvdcli.c
+@@ -252,7 +252,7 @@ static void usage()
+ #define LONGOPT2(x,y) y
+ #endif
+ 
+-    fprintf(stderr,
++    fprintf(stdout,
+             "syntax: dvdauthor [-o VTSBASE | -n] [options] VOBFILE(s)\n"
+             "\n\t-x XMLFILE where XMLFILE is a configuration file describing the\n"
+             "\t    structure of the DVD to create.  If you use a config file, then you\n"
+-- 
+2.19.2
+
