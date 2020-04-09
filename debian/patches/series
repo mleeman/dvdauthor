@@ -1,3 +1,4 @@
 0001-add-config-rpath.patch
 0002-dvdcli-move-message-to-stdout.patch
 0003-autotools-use-pkg-config-to-test-freetype2.patch
+0004-autotools-use-pkg-config-to-test-libxml2.patch
