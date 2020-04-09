@@ -1,3 +1,15 @@
+dvdauthor (0.7.2-2) unstable; urgency=medium
+
+  * debian: no html install
+  * debian: add watch file (Closes: #920207)
+  * debian: improve copyright
+  * debian: update standards version
+  * debian: standardise debian/rules
+  * debian: use pkg-config for libxml2 (Closes: #949098)
+  * autotools: remove generated files
+
+ -- Marc Leeman <marc.leeman@gmail.com>  Thu, 09 Apr 2020 09:36:30 +0200
+
 dvdauthor (0.7.2-1) unstable; urgency=medium
 
   * new upstream release 0.7.2 (Closes: #920207, Closes: #690300)
