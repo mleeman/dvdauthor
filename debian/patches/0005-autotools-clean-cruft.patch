@@ -1,0 +1,10 @@
+Index: dvdauthor/Makefile.am
+===================================================================
+--- dvdauthor.orig/Makefile.am
++++ dvdauthor/Makefile.am
+@@ -15,3 +15,5 @@ dvdauthor.spec: $(srcdir)/dvdauthor.spec
+ 	$(edit) $(srcdir)/dvdauthor.spec.in > dvdauthor.spec.tmp
+ 	mv dvdauthor.spec.tmp dvdauthor.spec
+ 
++maintainer-clean:
++	-rm -f doc/dvdauthor.1 doc/dvddirdel.1 doc/dvdunauthor.1 doc/manpage.refs doc/mpeg2desc.1 doc/spumux.1 doc/spuunmux.1 doc/video_format.7 src/dvdvml.c src/dvdvmy.c src/dvdvmy.h dvdauthor.spec Makefile config.log config.status
