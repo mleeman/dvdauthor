@@ -4,7 +4,6 @@ Priority: optional
 Maintainer: Marc Leeman <marc.leeman@gmail.com>
 Build-Depends: debhelper (>= 10),
                 bison,
-                cdbs,
                 docbook-to-man,
                 docbook-utils,
                 libfreetype6-dev,
