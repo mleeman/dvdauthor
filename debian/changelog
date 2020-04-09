@@ -6,6 +6,7 @@ dvdauthor (0.7.2-2) unstable; urgency=medium
   * debian: update standards version
   * debian: standardise debian/rules
   * debian: use pkg-config for libxml2 (Closes: #949098)
+  * debian: fix lintian warning dep on cdbs
   * autotools: remove generated files
 
  -- Marc Leeman <marc.leeman@gmail.com>  Thu, 09 Apr 2020 09:36:30 +0200
