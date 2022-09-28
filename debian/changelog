@@ -1,3 +1,18 @@
+dvdauthor (0.7.2-2) bullseye; urgency=medium
+
+  * debian: no html install
+  * debian: add watch file
+  * debian: improve copyright
+  * debian: update standards version
+  * debian: standardise debian/rules
+  * debian: use pkg-config for libxml2 (Closes: #949098)
+  * autotools: remove generated files
+  * debian: fix lintian warning dep on cdbs
+  * d/control: add 2nd e-mail for upload
+  * d/control: update Vcs tags
+
+ -- Marc Leeman <m.leeman@televic.com>  Wed, 28 Sep 2022 10:58:14 +0200
+
 dvdauthor (0.7.2-1) unstable; urgency=medium
 
   * new upstream release 0.7.2 (Closes: #920207, Closes: #690300)
