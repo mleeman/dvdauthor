@@ -1,4 +1,4 @@
-dvdauthor (0.7.2-2) bullseye; urgency=medium
+dvdauthor (0.7.2-2) unstable; urgency=medium
 
   * debian: no html install
   * debian: add watch file
@@ -11,7 +11,7 @@ dvdauthor (0.7.2-2) bullseye; urgency=medium
   * d/control: add 2nd e-mail for upload
   * d/control: update Vcs tags
 
- -- Marc Leeman <m.leeman@televic.com>  Wed, 28 Sep 2022 10:58:14 +0200
+ -- Marc Leeman <m.leeman@televic.com>  Wed, 28 Sep 2022 11:13:54 +0200
 
 dvdauthor (0.7.2-1) unstable; urgency=medium
 
