@@ -2,6 +2,7 @@ Source: dvdauthor
 Section: otherosfs
 Priority: optional
 Maintainer: Marc Leeman <marc.leeman@gmail.com>
+Uploaders: Marc Leeman <m.leeman@televic.com>
 Build-Depends: debhelper-compat (= 13),
                 bison,
                 docbook-to-man,
