@@ -14,7 +14,7 @@ dvdauthor (0.7.2-2) unstable; urgency=medium
   * d/control: add 2nd e-mail for upload
   * d/control: update Vcs tags
 
- -- Marc Leeman <marc.leeman@gmail.com>  Mon, 03 Oct 2022 12:39:55 +0200
+ -- Marc Leeman <marc.leeman@gmail.com>  Mon, 03 Oct 2022 13:42:10 +0200
 
 dvdauthor (0.7.2-1) unstable; urgency=medium
 
