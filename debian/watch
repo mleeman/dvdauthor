@@ -1,2 +1,4 @@
 version=4
-https://github.com/mleeman/dvdauthor/archive/(.+).tar.gz
+
+opts=filenamemangle=s/.+\/v?(\d\S+)\.tar\.gz/dvdauthor-$1\.tar\.gz/ \
+  https://github.com/ldo/dvdauthor/tags .*/v?(\d\S+)\.tar\.gz

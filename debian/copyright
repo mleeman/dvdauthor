@@ -1,35 +1,89 @@
-This package was debianized by Marc Leeman <marc.leeman@gmail.com> on
-Fri,  8 Aug 2003 21:37:16 +0200.
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: DVDAuthor
+Upstream-Contact: Lawrence D'Oliveiro <ldo@geek-central.gen.nz>
+Source: https://github.com/ldo/dvdauthor
 
-The current Debian maintainer is Marc Leeman <marc.leeman@gmail.com>
+Files: *
+Copyright: 2003-2010 Scott Smith
+           2010 Lawrence D'Oliveiro
+License: GPL-2+
 
-It was downloaded from: http://dvdauthor.sourceforge.net/
+Files: debian/*
+Copyright: 2003-2022 Marc Leeman
+License: GPL-2+
 
-Copyright 2003-2018 Marc Leeman <marc.leeman@gmail.com>
+Files: doc/dvddirdel.sgml
+       doc/dvdunauthor.sgml
+       doc/mpeg2desc.sgml
+       doc/root.sgml
+       doc/spuunmux.sgml
+       doc/video_format.sgml
+Copyright: 2003 Marc Leeman
+License: GPL-2+
 
-Upstream Author: Scott Smith <trckjunky@users.sourceforge.net>
-                 Lawrence D'Oliveiro <ldo@geek-central.gen.nz>
+Files: doc/spumux.xsd
+Copyright: 2005 Alan Canon
+License: GPL-2+
 
-Copyright: 2003 - 2010 Scott Smith
+Files: src/common.h
+       src/conffile.c
 Copyright: 2010 Lawrence D'Oliveiro
+License: GPL-2+
 
-License: LGPL-2+
+Files: src/da-internal.h
+       src/dvdauthor.c
+       src/dvdauthor.h
+       src/dvdcli.c
+       src/dvdcompile.c
+       src/dvdifo.c
+       src/dvdpgc.c
+       src/dvdunauthor.c
+       src/dvdvml.l
+       src/dvdvmy.y
+       src/dvdvob.c
+       src/mpeg2desc.c
+       src/readxml.c
+       src/subgen-image.c
+       src/subgen-parse-xml.c
+Copyright: 2002-2003 Scott Smith
+License: GPL-2+
 
-License:
+Files: src/dvduncompile.c
+Copyright: 2000-2001 Martin Norbäck, Håkan Hjort
+           2005 Scott Smith
+License: GPL-2+
 
-    This package is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2 of the License, or (at your option) any later version.
+Files: src/dvduncompile.h
+Copyright: 2000-2001 Martin Norbäck, Håkan Hjort
+License: GPL-2+
 
-    This package is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+Files: src/spuunmux.c
+       src/subgen.c
+       src/subgen.h
+       src/subgen-encode.c
+Copyright: 2002-2003 Jan Panteltje
+License: GPL-2+
 
-    You should have received a copy of the GNU Lesser General Public
-    License along with this package; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+Files: src/subfont.c
+       src/subreader.c
+       src/subrender.c
+Copyright: 2000-2003 Various authors of the MPLAYER project
+License: GPL-2+
 
-On Debian systems, the complete text of the GNU General Public
-License, version 2, can be found in /usr/share/common-licenses/GPL-2.
+License: GPL-2+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ .
+ On Debian systems, the complete text of the GNU General Public License,
+ version 2, can be found in /usr/share/common-licenses/GPL-2.
