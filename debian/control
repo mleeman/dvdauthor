@@ -17,8 +17,8 @@ Build-Depends: debhelper-compat (= 13),
 Standards-Version: 4.6.1
 Rules-Requires-Root: no
 Homepage: https://dvdauthor.sourceforge.net
-Vcs-Git: https://salsa.debian.org/den_erpel/dvdauthor.git
-Vcs-Browser: https://salsa.debian.org/den_erpel/dvdauthor/
+Vcs-Git: https://salsa.debian.org/erpel/dvdauthor.git
+Vcs-Browser: https://salsa.debian.org/erpel/dvdauthor/
 
 Package: dvdauthor
 Architecture: any
