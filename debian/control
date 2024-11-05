@@ -1,7 +1,8 @@
 Source: dvdauthor
 Section: otherosfs
 Priority: optional
-Maintainer: Marc Leeman <marc.leeman@gmail.com>
+Maintainer: Debian Multimedia Maintainers <debian-multimedia@lists.debian.org>
+Uploaders: Marc Leeman <marc.leeman@gmail.com>
 Build-Depends: debhelper-compat (= 13),
                 bison,
                 docbook-to-man,
@@ -17,8 +18,8 @@ Build-Depends: debhelper-compat (= 13),
 Standards-Version: 4.6.1
 Rules-Requires-Root: no
 Homepage: https://dvdauthor.sourceforge.net
-Vcs-Git: https://salsa.debian.org/erpel/dvdauthor.git
-Vcs-Browser: https://salsa.debian.org/erpel/dvdauthor/
+Vcs-Browser: https://salsa.debian.org/multimedia-team/dvdauthor
+Vcs-Git: https://salsa.debian.org/multimedia-team/dvdauthor.git
 
 Package: dvdauthor
 Architecture: any
