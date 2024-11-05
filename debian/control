@@ -14,7 +14,7 @@ Build-Depends: debhelper-compat (= 13),
                 libmagick++-dev,
                 libpng-dev,
                 libxml2-dev,
-                pkg-config
+                pkgconf
 Standards-Version: 4.7.0
 Rules-Requires-Root: no
 Homepage: https://dvdauthor.sourceforge.net
