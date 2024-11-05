@@ -15,7 +15,7 @@ Build-Depends: debhelper-compat (= 13),
                 libpng-dev,
                 libxml2-dev,
                 pkg-config
-Standards-Version: 4.6.1
+Standards-Version: 4.7.0
 Rules-Requires-Root: no
 Homepage: https://dvdauthor.sourceforge.net
 Vcs-Browser: https://salsa.debian.org/multimedia-team/dvdauthor

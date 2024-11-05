@@ -2,6 +2,7 @@ dvdauthor (0.7.2-3) UNRELEASED; urgency=medium
 
   * Team upload.
   * Move package to Debian Multimedia team
+  * Standards-Version: 4.7.0 (routine-update)
 
  -- Andreas Tille <tille@debian.org>  Tue, 05 Nov 2024 11:51:44 +0100
 
